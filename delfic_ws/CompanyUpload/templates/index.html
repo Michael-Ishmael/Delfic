@@ -1,0 +1,90 @@
+{% extends "__base.html" %}
+
+{% block content %}
+
+    <div class="controls row">
+        <div class="col-md-10">
+            <h1>
+                List
+            </h1>
+
+        </div>
+        <div class="col-md-2">
+            <form class="form-inline" role="form" enctype="multipart/form-data" method="post"
+                  action="{% url 'fileupload' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ uploadForm }}
+                    <p class="help-block">Choose a company .CSV file to upload.</p>
+                </div>
+                <input type="submit" value="Submit"/>
+            </form>
+        </div>
+    </div>
+
+    <div class="main row">
+        <div class="col-md-4">
+            <div class="company-list">
+
+                {% if exception %}
+
+                    <div>{{ exception }}</div>
+
+                {% endif %}
+
+                {% if companies %}
+                    <ul>
+                        {% for company in companies %}
+                            <li class="company-item">
+                                <address>
+                                    <strong>
+                                        <a href="{% url "findcompanywebsite" company.RegisteredNumber %}"
+                                           class="company-link"
+                                           data-ref="{{ company.RegisteredNumber }}">{{ company.Name }}</a></strong>
+                                    <b>{{ company.RegisteredNumber }}</b><br>
+                                    {% if company.AddressLine1 %} {{ company.AddressLine1 }} <br> {% endif %}
+                                    {% if company.AddressLine2 %} {{ company.AddressLine2 }} <br> {% endif %}
+                                    {% if company.AddressLine3 %} {{ company.AddressLine3 }} <br> {% endif %}
+                                    {% if company.AddressLine4 %} {{ company.AddressLine4 }} <br> {% endif %}
+                                    {% if company.AddressLine5 %} {{ company.AddressLine5 }} <br> {% endif %}
+                                </address>
+                                <div class="stats">
+                                    <ul class="clearfix">
+                                        <li>
+                                            <span class="stat-label">Turnover:</span>
+                                            <span class="value">{{ company.Turnover }}</span></li>
+                                        <li>
+                                            <span class="stat-label">Website:</span>
+                                            <span class="url-result">
+
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No companies are available.</p>
+                {% endif %}
+
+            </div>
+        </div>
+        <div class="col-md-4">
+            <a href="#" id="process-companies">Process Companies</a><br>
+            <a href="#" id="filter-companies" class="hidden">Filter Companies</a><br>
+            <a href="#" id="process-company-websites" class="hidden">Process Company Websites</a><br>
+
+            <div id="company-details" class="hidden">
+                <div class="process-status">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+
+
+{% endblock %}
+

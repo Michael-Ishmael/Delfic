@@ -1,0 +1,44 @@
+
+.controls {
+    background-color: #0088cc;
+}
+
+.company {
+    text-decoration: none;
+}
+
+.main {
+    margin-top: 20px;
+}
+
+.company-list li {
+    list-style: none;
+}
+
+.company-details {
+    background-color: #ccc;
+}
+
+.stats ul {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.stats li {
+    list-style: none;
+}
+
+.stats span {
+    display: inline-block;
+}
+
+.stats .stat-label {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #080808;
+}
+
+.stats .value {
+    margin-right: 5px;
+}
