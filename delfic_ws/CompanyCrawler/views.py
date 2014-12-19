@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
+from CompanyCrawler.models import Company
 
 from delfic_ws.business.data import CsvLoader
 from delfic_ws.business.web import WebsiteLocator
@@ -8,6 +9,11 @@ from delfic_ws.business.web import WebsiteLocator
 def index(request):
     return JsonResponse({"success": True, "message": "Site running..."})
 
+def companies(request):
+    companies = Company.objects.order_by('-Name')[:5]
+
+    context = {'companies': companies_rev, 'uploadForm': form}
+    return render(request, 'index.html', context)
 
 def handle_uploaded_file(f):
     loader = CsvLoader()
