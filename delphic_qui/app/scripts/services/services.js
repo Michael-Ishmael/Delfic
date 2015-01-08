@@ -1,35 +1,59 @@
 'use strict';
 
-var services = angular.module('guthub.services',
+var services = angular.module('delfic.services',
     ['ngResource']);
 
-services.factory('Recipe', ['$resource',
-    function($resource) {
-  return $resource('/recipes/:id', {id: '@id'});
-}]);
+services.factory('Company', ['$resource',
+    function ($resource) {
+        return $resource('http://127.0.0.1\\:8000/company/:id', {id: '@id'});
+    }]);
 
-services.factory('MultiRecipeLoader', ['Recipe', '$q',
-    function(Recipe, $q) {
-  return function() {
-    var delay = $q.defer();
-    Recipe.query(function(recipes) {
-      delay.resolve(recipes);
-    }, function() {
-      delay.reject('Unable to fetch recipes');
-    });
-    return delay.promise;
-  };
-}]);
+services.factory('MultiCompanyLoader', ['Company', '$q',
+    function (Company, $q) {
+        return function () {
+            var delay = $q.defer();
+            Company.query(function (companies) {
+                delay.resolve(companies);
+            }, function () {
+                delay.reject('Unable to fetch companies');
+            });
+            return delay.promise;
+        };
+    }]);
 
-services.factory('RecipeLoader', ['Recipe', '$route', '$q',
-    function(Recipe, $route, $q) {
-  return function() {
-    var delay = $q.defer();
-    Recipe.get({id: $route.current.params.recipeId}, function(recipe) {
-      delay.resolve(recipe);
-    }, function() {
-      delay.reject('Unable to fetch recipe '  + $route.current.params.recipeId);
+services.factory('CompanyLoader', ['Company', '$route', '$q',
+    function (Company, $route, $q) {
+        return function () {
+            var delay = $q.defer();
+            Company.get({id: $route.current.params.companyId}, function (company) {
+                delay.resolve(company);
+            }, function () {
+                delay.reject('Unable to fetch company ' + $route.current.params.companyId);
+            });
+            return delay.promise;
+        };
+    }]);
+
+
+services.factory('CompanyWebsiteLocator', function ($http, $q){
+
+        var service = {};
+
+        service.getWebsiteUrl = function(registeredNumber){
+
+            var delay = $q.defer();
+
+            $http.get('http://127.0.0.1:8000/company/' + registeredNumber + '/website')
+                .success(function(data, status, headers, config) {
+                    delay.resolve(data.url)
+                }).
+                error(function(data, status, headers, config) {
+                    delay.reject('Unable to fetch website for company ' + registeredNumber);
+                });
+
+            return delay.promise;
+        };
+
+        return service;
+
     });
-    return delay.promise;
-  };
-}]);

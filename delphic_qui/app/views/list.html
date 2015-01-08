@@ -1,6 +1,9 @@
-<h3>Recipe List</h3>
-<ul class="recipes">
-  <li ng-repeat="recipe in recipes">
-    <div><a ng-href="/#/view/{{recipe.id}}">{{recipe.title}}</a></div>
+<h3>Company List</h3>
+<ul class="companies">
+  <li ng-repeat="company in companies">
+    <div><a ng-href="/#/view/{{company.registerednumber}}">{{company.name}}</a></div>
+    <div ng-show="company.websiteurl!=null">{{company.websiteurl}}</div>
+    <div ng-show="company.loading == true">Loading...</div>
+    <button ng-show="company.websiteurl==null" ng-click="getWebsiteUrl(company.registerednumber, $index)" disabled="{{company.loading}}">Get Url</button>
   </li>
 </ul>

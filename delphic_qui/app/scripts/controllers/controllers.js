@@ -1,90 +1,105 @@
 'use strict';
 
-var app = angular.module('guthub',
-    ['guthub.directives', 'guthub.services']);
+var app = angular.module('delfic',
+    ['delfic.directives', 'delfic.services']);
 
-app.config(['$routeProvider', function($routeProvider) {
+app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.
-      when('/', {
-        controller: 'ListCtrl',
-        resolve: {
-          recipes: ["MultiRecipeLoader", function(MultiRecipeLoader) {
-            return MultiRecipeLoader();
-          }]
-        },
-        templateUrl:'/views/list.html'
-      }).when('/edit/:recipeId', {
-        controller: 'EditCtrl',
-        resolve: {
-          recipe: ["RecipeLoader", function(RecipeLoader) {
-            return RecipeLoader();
-          }]
-        },
-        templateUrl:'/views/recipeForm.html'
-      }).when('/view/:recipeId', {
-        controller: 'ViewCtrl',
-        resolve: {
-          recipe: ["RecipeLoader", function(RecipeLoader) {
-            return RecipeLoader();
-          }]
-        },
-        templateUrl:'/views/viewRecipe.html'
-      }).when('/new', {
-        controller: 'NewCtrl',
-        templateUrl:'/views/recipeForm.html'
-      }).otherwise({redirectTo:'/'});
+        when('/', {
+            controller: 'ListCtrl',
+            resolve: {
+                companies: ["MultiCompanyLoader", function (MultiCompanyLoader) {
+                    return MultiCompanyLoader();
+                }]
+            },
+            templateUrl: '/views/list.html'
+        }).when('/edit/:companyId', {
+            controller: 'EditCtrl',
+            resolve: {
+                company: ["CompanyLoader", function (CompanyLoader) {
+                    return CompanyLoader();
+                }]
+            },
+            templateUrl: '/views/companyForm.html'
+        }).when('/view/:companyId', {
+            controller: 'ViewCtrl',
+            resolve: {
+                company: ["CompanyLoader", function (CompanyLoader) {
+                    return CompanyLoader();
+                }]
+            },
+            templateUrl: '/views/viewCompany.html'
+        }).when('/new', {
+            controller: 'NewCtrl',
+            templateUrl: '/views/companyForm.html'
+        }).otherwise({redirectTo: '/'});
 }]);
 
-app.controller('ListCtrl', ['$scope', 'recipes',
-    function($scope, recipes) {
-  $scope.recipes = recipes;
-}]);
+app.controller('ListCtrl', ['$scope', 'companies', 'CompanyWebsiteLocator',
+    function ($scope, companies, CompanyWebsiteLocator) {
+        $scope.companies = companies;
 
-app.controller('ViewCtrl', ['$scope', '$location', 'recipe',
-    function($scope, $location, recipe) {
-  $scope.recipe = recipe;
+        $scope.getWebsiteUrl = function (id, idx) {
+            companies[idx].loading = true;
+            var promise = CompanyWebsiteLocator.getWebsiteUrl(id);
+            promise.then(function (payload) {
+                    $scope.companies[idx].websiteurl = payload;
+                    companies[idx].loading = false;
+                },
+                function (errorPayload) {
+                    $scope.companies[idx].websiteurl = errorPayload;
+                    companies[idx].loading = false;
+                }
+            );
+        };
 
-  $scope.edit = function() {
-    $location.path('/edit/' + recipe.id);
-  };
-}]);
+    }]);
 
-app.controller('EditCtrl', ['$scope', '$location', 'recipe',
-    function($scope, $location, recipe) {
-  $scope.recipe = recipe;
+app.controller('ViewCtrl', ['$scope', '$location', 'company',
+    function ($scope, $location, company) {
+        $scope.company = company;
 
-  $scope.save = function() {
-    $scope.recipe.$save(function(recipe) {
-      $location.path('/view/' + recipe.id);
-    });
-  };
+        $scope.edit = function () {
+            $location.path('/edit/' + company.registerednumber);
+        };
+    }]);
 
-  $scope.remove = function() {
-    delete $scope.recipe;
-    $location.path('/');
-  };
-}]);
+app.controller('EditCtrl', ['$scope', '$location', 'company',
+    function ($scope, $location, company) {
+        $scope.company = company;
 
-app.controller('NewCtrl', ['$scope', '$location', 'Recipe',
-    function($scope, $location, Recipe) {
-  $scope.recipe = new Recipe({
-    ingredients: [ {} ]
-  });
+        $scope.save = function () {
+            $scope.company.$save(function (company) {
+                $location.path('/view/' + company.registerednumber);
+            });
+        };
 
-  $scope.save = function() {
-    $scope.recipe.$save(function(recipe) {
-      $location.path('/view/' + recipe.id);
-    });
-  };
-}]);
+        $scope.remove = function () {
+            delete $scope.company;
+            $location.path('/');
+        };
+    }]);
+
+app.controller('NewCtrl', ['$scope', '$location', 'Company',
+    function ($scope, $location, Company) {
+        $scope.company = new Company({
+            ingredients: [{}]
+        });
+
+        $scope.save = function () {
+            $scope.company.$save(function (company) {
+                $location.path('/view/' + company.registerednumber);
+            });
+        };
+    }]);
 
 app.controller('IngredientsCtrl', ['$scope',
-    function($scope) {
-  $scope.addIngredient = function() {
-    var ingredients = $scope.recipe.ingredients;
-    ingredients[ingredients.length] = {};
-  };
-  $scope.removeIngredient = function(index) {
-    $scope.recipe.ingredients.splice(index, 1);
-  };
-}]);
+    function ($scope) {
+        $scope.addIngredient = function () {
+            var ingredients = $scope.company.ingredients;
+            ingredients[ingredients.length] = {};
+        };
+        $scope.removeIngredient = function (index) {
+            $scope.company.ingredients.splice(index, 1);
+        };
+    }]);

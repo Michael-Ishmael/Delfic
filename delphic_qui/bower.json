@@ -1,0 +1,25 @@
+{
+  "name": "delphic_qui",
+  "version": "0.0.0",
+  "homepage": "https://github.com/funhead/Delfic",
+  "authors": [
+    "Michael Ishmael <michaelishmael1976@gmail.com>"
+  ],
+  "description": "Quick Angular UI for Delphic API",
+  "main": "\"app/index.html\"",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "Crawler"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

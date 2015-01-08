@@ -6,14 +6,21 @@ from delfic_ws.business.data import CsvLoader
 from delfic_ws.business.web import WebsiteLocator
 
 
+# def index(request):
+# return JsonResponse({"success": True, "message": "Site running..."})
+
 def index(request):
-    return JsonResponse({"success": True, "message": "Site running..."})
+    company_list = Company.objects.order_by('-Name')[:20]
+    j_comps = map(lambda c: c.to_json_obj(), company_list)
+    return JsonResponse(j_comps, safe=False)
 
-def companies(request):
-    companies = Company.objects.order_by('-Name')[:5]
 
-    context = {'companies': companies_rev, 'uploadForm': form}
-    return render(request, 'index.html', context)
+def company(request, company_ref):
+    f_company = Company.objects.get(pk=company_ref)
+    if f_company is None:
+        return JsonResponse({})
+    return JsonResponse(f_company.to_json_obj())
+
 
 def handle_uploaded_file(f):
     loader = CsvLoader()

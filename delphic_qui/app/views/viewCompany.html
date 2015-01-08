@@ -1,0 +1,24 @@
+<h2>{{company.name}}</h2>
+
+<div>{{company.registerednumber}}</div>
+<br>
+<br>
+<h3>Address</h3>
+<span ng-show="company.address == null">No Address</span>
+<address>
+  <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
+  <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
+  <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
+  <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
+  <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
+  <span ng-show="company.address.town">{{company.address.town}}<br></span>
+  <span ng-show="company.address.county">{{company.address.county}}<br></span>
+  <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
+</address>
+
+
+<form ng-submit="edit()" class="form-horizontal">
+  <div class="form-actions">
+    <button class="btn btn-primary">Edit</button>
+  </div>
+</form>
