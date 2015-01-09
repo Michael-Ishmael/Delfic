@@ -34,6 +34,29 @@ services.factory('CompanyLoader', ['Company', '$route', '$q',
         };
     }]);
 
+services.factory('CompanyRepository', ['Company', '$q',
+    function(Company, $q){
+
+        var repo = {};
+        repo.companies = [];
+        repo.selectedIndex = -1;
+
+        /*getCompanies();
+
+        function getCompanies(){
+            var delay = $q.defer();
+            Company.query(function (companies) {
+                delay.resolve(companies);
+            }, function () {
+                delay.reject('Unable to fetch companies');
+            });
+            return delay.promise;
+        }*/
+
+        return repo;
+
+    }
+]);
 
 services.factory('CompanyWebsiteLocator', function ($http, $q){
 
@@ -52,6 +75,22 @@ services.factory('CompanyWebsiteLocator', function ($http, $q){
                 });
 
             return delay.promise;
+        };
+
+        service.getWebsiteLinks  = function(url){
+
+            var delay = $q.defer();
+
+            $http.get('http://127.0.0.1:8000/findcompanylinks/?url=' + url)
+                .success(function(data, status, headers, config) {
+                    delay.resolve(data.links)
+                }).
+                error(function(data, status, headers, config) {
+                    delay.reject('Unable to fetch links for website: ' + url);
+                });
+
+            return delay.promise;
+
         };
 
         return service;

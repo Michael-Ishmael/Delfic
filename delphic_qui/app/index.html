@@ -1,34 +1,42 @@
 <!DOCTYPE html>
-<html   lang="en" ng-app="delfic">
+<html lang="en" ng-app="delfic">
 <head>
-  <title>GutHub - Create and Share</title>
-  <script src="scripts/vendor/angular.min.js"></script>
-  <script src="scripts/vendor/angular-resource.min.js"></script>
-  <script src="scripts/directives/directives.js"></script>
-  <script src="scripts/services/services.js"></script>
-  <script src="scripts/controllers/controllers.js"></script>
-  <link href="styles/bootstrap.css" rel="stylesheet">
-  <link href="styles/guthub.css" rel="stylesheet">
+    <title>Delphic - Company Crawler</title>
+    <script src="scripts/vendor/angular.min.js"></script>
+    <script src="scripts/vendor/angular-resource.min.js"></script>
+    <script src="scripts/directives/directives.js"></script>
+    <script src="scripts/services/services.js"></script>
+    <script src="scripts/controllers/controllers.js"></script>
+    <link href="styles/bootstrap.css" rel="stylesheet">
+    <link href="styles/delphic.css" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>GutHub</h1>
-  </header>
-
-  <div butterbar>Loading...</div>
-
-  <div class="container-fluid">
-    <div class="row-fluid">
-      <div class="span2">
-        <!--Sidebar-->
-        <div id="focus"><a href="/#/new">New Company</a></div>
-        <div><a href="/#/">Company List</a></div>
-
-      </div>
-      <div class="span10">
-        <div ng-view></div>
-      </div>
+<header>
+    <div class="container-fluid">
+        <h2>Company Crawler</h2>
     </div>
-  </div>
+
+</header>
+
+<div butterbar>Loading...</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="main-column col-md-3 color-1 nopadding">
+            <div ng-controller="CompanyListController" ng-include="'views/list.html'">
+            </div>
+        </div>
+        <div class="col-md-4 color-2">
+            <div ng-controller="ManageCompanyController" ng-include="'views/viewCompany.html'">
+
+            </div>
+        </div>
+        <div class="col-md-5 color-3">
+            Column 3
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>

@@ -1,9 +1,34 @@
 <h3>Company List</h3>
-<ul class="companies">
-  <li ng-repeat="company in companies">
-    <div><a ng-href="/#/view/{{company.registerednumber}}">{{company.name}}</a></div>
-    <div ng-show="company.websiteurl!=null">{{company.websiteurl}}</div>
-    <div ng-show="company.loading == true">Loading...</div>
-    <button ng-show="company.websiteurl==null" ng-click="getWebsiteUrl(company.registerednumber, $index)" disabled="{{company.loading}}">Get Url</button>
-  </li>
+<ul class="company-listing">
+    <li ng-repeat="company in companies"  ng-click="selectCompany($index, company.registerednumber)">
+        <div class="row">
+            <div class="col-md-10">
+                <div class="company-name"><a>{{company.name}}</a></div>
+            </div>
+            <div class="col-md-2 text-right">
+                <span ng-click="$scope.edit()" class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            </div>
+        </div>
+
+        <div class="reg-number">{{company.registerednumber}}</div>
+        <div class="address">
+            <span ng-show="company.address == null">No Address</span>
+            <address>
+                <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
+                <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
+                <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
+                <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
+                <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
+                <span ng-show="company.address.town">{{company.address.town}}<br></span>
+                <span ng-show="company.address.county">{{company.address.county}}<br></span>
+                <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
+            </address>
+        </div>
+
+        <div ng-show="company.website">
+            <a href="{{company.website}}" target="_blank">
+                {{ company.website }}</a>
+        </div>
+
+    </li>
 </ul>

@@ -93,13 +93,60 @@ app.controller('NewCtrl', ['$scope', '$location', 'Company',
         };
     }]);
 
-app.controller('IngredientsCtrl', ['$scope',
-    function ($scope) {
-        $scope.addIngredient = function () {
-            var ingredients = $scope.company.ingredients;
-            ingredients[ingredients.length] = {};
-        };
-        $scope.removeIngredient = function (index) {
-            $scope.company.ingredients.splice(index, 1);
-        };
-    }]);
+app.controller('CompanyListController', function ($scope, CompanyRepository, MultiCompanyLoader) {
+
+        $scope.repo = CompanyRepository;
+        $scope.companies = [];
+
+        $scope.$watch('repo.companies', function(){
+            $scope.companies = $scope.repo.companies;
+        });
+
+        MultiCompanyLoader().then(function (companies) {
+            $scope.repo.companies = companies;
+        });
+
+        $scope.selectCompany = function (idx, id) {
+            $scope.repo.selectedIndex = idx;
+        }
+    }
+);
+
+app.controller('ManageCompanyController', function ($scope, CompanyRepository, CompanyWebsiteLocator) {
+
+    $scope.repo = CompanyRepository;
+
+    $scope.$watch('repo.selectedIndex', function () {
+        if ($scope.repo.selectedIndex > -1
+            && $scope.repo.companies.length > $scope.repo.selectedIndex) {
+            $scope.company = $scope.repo.companies[CompanyRepository.selectedIndex]
+        }
+    });
+
+    $scope.getWebsiteUrl = function (id) {
+        $scope.websiteStatus = 'Finding website...';
+        var promise = CompanyWebsiteLocator.getWebsiteUrl(id);
+        promise.then(function (payload) {
+                $scope.company.website = payload;
+                $scope.websiteStatus = null;
+            },
+            function (errorPayload) {
+                $scope.websiteStatus = errorPayload;
+            }
+        );
+    };
+
+    $scope.getWebsiteLinks = function () {
+        var promise = CompanyWebsiteLocator.getWebsiteLinks($scope.company.website);
+        promise.then(function (payload) {
+                $scope.company.websitelinks = payload;
+                $scope.websiteLinkStatus = null;
+            },
+            function (errorPayload) {
+                $scope.websiteLinkStatus = errorPayload;
+            }
+        );
+    }
+
+
+});

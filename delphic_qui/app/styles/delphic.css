@@ -1,0 +1,105 @@
+body {
+    background-color: #333333;
+    color: #fff;
+}
+
+header{
+    padding: 10px 0;
+    background-color: #204d74
+}
+
+h1, h2, h3, h4 {
+    margin: 0;
+}
+
+a {
+    color: #0b97c4;
+    text-decoration: none;
+}
+
+a:hover {
+    color:inherit;
+    text-decoration: underline;
+}
+
+
+ul {
+    padding: 0;
+}
+
+ul li {
+    list-style: none;
+}
+
+.main-column h3{
+    padding: 10px 10px 18px;
+}
+
+.main-column li{
+    padding: 10px;
+}
+
+.nopadding{
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.color-1{
+    background-color: #444;
+}
+
+.color-2{
+    background-color: transparent;
+}
+
+.color-3{
+    background-color: transparent;
+}
+
+.company-listing{
+    max-height: 700px;
+    overflow: scroll;
+}
+
+.company-listing li:nth-child(odd) {
+    background-color: #333;
+}
+
+.company-listing .company-name{
+    font-weight: bold;
+    color: #0b97c4;
+}
+
+.company-listing .reg-number {
+    font-style: italic;
+}
+
+.company-listing .address {
+    display: none;
+}
+
+/*.company-listing li:hover .address{
+    display: block;
+}*/
+
+.control-buttons{
+    padding: 10px;
+    background-color: #444;
+}
+
+.company-summary-container{
+    padding: 10px;
+}
+
+.company-summary{
+
+}
+
+.company-summary address{
+    font-size: 12px;
+}
+
+.company-summary .website-url{
+    font-size: 16px;
+    font-weight: bold;
+}

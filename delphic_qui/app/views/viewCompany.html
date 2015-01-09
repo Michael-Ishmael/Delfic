@@ -1,24 +1,55 @@
-<h2>{{company.name}}</h2>
+<div class="control-buttons">
+  <button class="btn btn-primary" ng-class="{disabled: !company}" ng-click="getWebsiteUrl(company.registerednumber)">Find Website</button>
+  <button class="btn btn-primary" ng-class="{disabled: !company.website}" ng-click="getWebsiteLinks()">Find Pages</button>
+</div>
 
-<div>{{company.registerednumber}}</div>
-<br>
-<br>
-<h3>Address</h3>
-<span ng-show="company.address == null">No Address</span>
-<address>
-  <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
-  <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
-  <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
-  <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
-  <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
-  <span ng-show="company.address.town">{{company.address.town}}<br></span>
-  <span ng-show="company.address.county">{{company.address.county}}<br></span>
-  <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
-</address>
+<div class="company-summary-container">
+  <div class="company-summary" ng-show="company">
+    <h3>{{company.name}}</h3>
+
+    <div>{{company.registerednumber}}</div>
+    <br>
+    <h4>Address</h4>
+    <span ng-show="company.address == null">No Address</span>
+    <address>
+      <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
+      <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
+      <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
+      <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
+      <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
+      <span ng-show="company.address.town">{{company.address.town}}<br></span>
+      <span ng-show="company.address.county">{{company.address.county}}<br></span>
+      <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
+    </address>
 
 
-<form ng-submit="edit()" class="form-horizontal">
-  <div class="form-actions">
-    <button class="btn btn-primary">Edit</button>
+
+    <div class="website-url">
+      <p class="message" ng-show="websiteStatus">
+        {{ websiteStatus }}
+      </p>
+      <a ng-show="company.website" href="{{company.website}}" target="_blank">
+        {{ company.website }}</a>
+    </div>
+
+    <div class="website-links" ng-show="company.websitelinks">
+      <div ng-repeat="link in company.websitelinks">
+        {{ link.link }}
+      </div>
+
+    </div>
+
   </div>
-</form>
+
+  <div class="message" ng-hide="company">
+    <p><span class="glyphicon glyphicon-chevron-left">&nbsp;</span>
+      Select a company from the left to begin testing</p>
+  </div>
+
+
+</div>
+
+
+
+
+
