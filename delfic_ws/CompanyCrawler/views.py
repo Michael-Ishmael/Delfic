@@ -47,3 +47,29 @@ def find_company_links(request):
         return JsonResponse(json_resp)
     except Exception as ex:
         return JsonResponse({"success": False, "message": ex.message})
+
+
+def get_website_meta(request):
+    company_url = request.GET.get('url')
+    if not company_url:
+        company_url = request.POST.get('url')
+    locator = WebsiteLocator()
+    try:
+        company_url_response = locator.get_website_meta(company_url)
+        json_resp = company_url_response.to_json_dict()
+        return JsonResponse(json_resp)
+    except Exception as ex:
+        return JsonResponse({"success": False, "message": ex.message})
+
+
+def get_calais_tags(request):
+    company_url = request.GET.get('url')
+    if not company_url:
+        company_url = request.POST.get('url')
+    locator = WebsiteLocator()
+    try:
+        company_url_response = locator.get_calais_tags(company_url)
+        json_resp = company_url_response.to_json_dict()
+        return JsonResponse(json_resp)
+    except Exception as ex:
+        return JsonResponse({"success": False, "message": ex.message})

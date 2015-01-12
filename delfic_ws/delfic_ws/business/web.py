@@ -28,6 +28,24 @@ class CompanyWebLink:
         return json.dumps({"title": self.title, "link": self.link})
 
 
+class CompanyMetaResult:
+    def __init__(self, company_url):
+        self.company_url = company_url
+        self.metaDict = {}
+        self.success = True
+        self.message = ""
+
+    def add_meta_tag(self, tag_name, tag_value):
+        self.metaDict[tag_name] = tag_value
+
+    def to_json_dict(self):
+        return {
+            "success": self.success,
+            "message": self.message,
+            "tags": self.metaDict
+        }
+
+
 class CompanyScrapeResult:
     def __init__(self, company_name, company_url):
         self.company_name = company_name
@@ -58,10 +76,13 @@ class CompanyScrapeResult:
         if stored_link and stored_link not in self.all_links:
             link_obj = CompanyWebLink(stored_link, title)
             self.all_links.append(link_obj)
-            link_parts = urlparse.urlparse(stored_link)
-            depth = link_parts.path.count('/')
+            link_path = urlparse.urlparse(stored_link).path
+            if link_path[-1:] == '/':
+                link_path = link_path[:-1]
+            depth = link_path.count('/')
             if depth == 1:
                 self.direct_links.append(link_obj)
+
 
     def to_json_dict(self):
         return {
@@ -71,10 +92,52 @@ class CompanyScrapeResult:
         }
 
 
+class CompanyCalaisResult:
+    def __init__(self, calais_result):
+        self.calais_result = calais_result
+        self.success = False
+        self.message = ""
+        self.entity_dict = {}
+        self.topics = []
+
+    def clean_result(self):
+
+        if self.calais_result:
+            if hasattr(self.calais_result, "entities"):
+                for k, e in self.calais_result.entities.iteritems():
+                    e_type = e["_type"]
+                    e_text = e["name"]
+                    e_relevance = e['relevance']
+                    if e_type not in self.entity_dict:
+                        self.entity_dict[e_type] = []
+                    if (e_text, e_relevance) not in self.entity_dict[e_type]:
+                        self.entity_dict[e_type].append((e_text, e_relevance))
+                    self.success = True
+
+            if hasattr(self.calais_result, "topics"):
+                for k, t in self.calais_result.topics.iteritems():
+                    t_category = t["category"]
+                    t_category_name = t["categoryName"]
+                    t_score = t["score"]
+                    if (t_category_name, t_score, t_category) not in self.topics:
+                        self.topics.append((t_category_name, t_score, t_category))
+                    self.success = True
+
+
+    def to_json_dict(self):
+        self.clean_result()
+        return {
+            "success": self.success,
+            "message": self.message,
+            "entities": self.entity_dict,
+            "topics": self.topics
+        }
+
+
 class WebsiteLocator:
     def __init__(self):
         self.rootSite = "http://companycheck.co.uk/company/"
-        API_KEY = "n6fmydbypqcp5u8wrbxu725v"
+        self.API_KEY = "n6fmydbypqcp5u8wrbxu725v"
 
     def find_website(self, company_ref):
         target_url = urlparse.urljoin(self.rootSite, company_ref)
@@ -98,11 +161,42 @@ class WebsiteLocator:
             return {"success": False, "message": ex.message}
 
 
+    def get_website_meta(self, company_url):
+        result = CompanyMetaResult(company_url)
+        try:
+            response = urllib2.urlopen(company_url)
+            soup = BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('head'))
+            title = soup.find('title')
+            if title is not None:
+                title_text = title.text
+                if len(title_text) > 0:
+                    result.add_meta_tag("title", title_text.strip())
+
+            desc = soup.find(attrs={"name": "description"})
+            if desc is not None:
+                desc_text = desc.attrs["content"]
+                if len(desc_text) > 0:
+                    result.add_meta_tag("description", desc_text.strip())
+
+            keywords = soup.find(attrs={"name": "keywords"})
+            if keywords is not None:
+                keywords_text = desc.attrs["content"]
+                if len(keywords_text) > 0:
+                    result.add_meta_tag("description", keywords_text.strip())
+
+            result.success = True
+        except Exception as ex:
+            result.success = False
+            result.message = ex.message
+        return result
+
+
     def find_website_links(self, company_url):
         result = CompanyScrapeResult("test", company_url)
         try:
             response = urllib2.urlopen(company_url)
-            for link in BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a')):
+            links = BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a'))
+            for link in links:
                 if "href" in link.attrs and link.attrs['href'] != '#':
                     url = link.attrs["href"]
                     title = link.text
@@ -149,5 +243,7 @@ class WebsiteLocator:
 
     def get_calais_tags(self, url):
         calais = Calais(self.API_KEY, submitter="python-calais demo")
-        result = calais.analyze_url(url)
-        return result;
+        calais_result = calais.analyze_url(url)
+        result = CompanyCalaisResult(calais_result)
+        result.clean_result()
+        return result

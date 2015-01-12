@@ -128,6 +128,7 @@ app.controller('ManageCompanyController', function ($scope, CompanyRepository, C
         var promise = CompanyWebsiteLocator.getWebsiteUrl(id);
         promise.then(function (payload) {
                 $scope.company.website = payload;
+                if(payload) $scope.repo.selectedUrl = payload;
                 $scope.websiteStatus = null;
             },
             function (errorPayload) {
@@ -136,8 +137,77 @@ app.controller('ManageCompanyController', function ($scope, CompanyRepository, C
         );
     };
 
-    $scope.getWebsiteLinks = function () {
+    $scope.loadSiteData  = function() {
+        getWebsiteMetaTags();
+        getWebsiteLinks();
+    };
+
+    $scope.setAnalyseUrl = function (url) {
+      $scope.repo.selectedUrl = url;
+    };
+
+    function getWebsiteMetaTags () {
+        $scope.websiteStatus = 'Finding metadata...';
+        var promise = CompanyWebsiteLocator.getWebsiteMeta($scope.company.website);
+        promise.then(function (payload) {
+                $scope.company.metatags = payload;
+                $scope.websiteStatus = null;
+            },
+            function (errorPayload) {
+                $scope.websiteStatus = errorPayload;
+            }
+        );
+    };
+
+    function getWebsiteLinks() {
+        $scope.websiteStatus += '<br>Finding top level links...';
         var promise = CompanyWebsiteLocator.getWebsiteLinks($scope.company.website);
+        promise.then(function (payload) {
+                $scope.company.websitelinks = payload;
+                $scope.websiteLinkStatus = null;
+            },
+            function (errorPayload) {
+                $scope.websiteLinkStatus = errorPayload;
+            }
+        );
+    }
+
+
+});
+
+
+app.controller('CompanyMetadataController', function ($scope, CompanyRepository, CompanyPageResults) {
+
+    $scope.repo = CompanyRepository;
+    $scope.pageUrl = '';
+
+    $scope.$watch('repo.selectedUrl', function () {
+        $scope.pageUrl = $scope.repo.selectedUrl;
+        $scope.loadPageResults();
+    });
+
+    $scope.loadPageResults  = function() {
+        if(!$scope.pageUrl) return;
+        getPageCalais();
+        //getWebsiteLinks();
+    }
+
+    function getPageCalais () {
+        $scope.status = 'Finding page Open Calais results...';
+        var promise = CompanyPageResults.getCalaisTags($scope.pageUrl);
+        promise.then(function (payload) {
+                $scope.calaisTags = payload;
+                $scope.status = null;
+            },
+            function (errorPayload) {
+                $scope.status = errorPayload;
+            }
+        );
+    };
+
+    function getWebsiteLinks() {
+        $scope.websiteStatus += '<br>Finding top level links...';
+        var promise = CompanyPageResults.getWebsiteLinks($scope.company.website);
         promise.then(function (payload) {
                 $scope.company.websitelinks = payload;
                 $scope.websiteLinkStatus = null;

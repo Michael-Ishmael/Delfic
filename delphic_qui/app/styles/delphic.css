@@ -95,11 +95,31 @@ ul li {
 
 }
 
-.company-summary address{
+.company-summary .message {
+    font-style: italic;
+}
+
+.company-summary address {
     font-size: 12px;
 }
 
-.company-summary .website-url{
+.company-summary .website-url {
     font-size: 16px;
     font-weight: bold;
+}
+
+.company-summary .summary-section {
+    margin: 10px 0;
+}
+
+.company-summary td {
+    padding: 2px;
+}
+
+.company-summary tr td:first-child{
+    padding-right: 5px;
+}
+
+.website-links div{
+    margin-bottom: 20px;
 }

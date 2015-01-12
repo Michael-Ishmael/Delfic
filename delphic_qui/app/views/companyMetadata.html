@@ -1,0 +1,51 @@
+<div ng-controller="CompanyMetadataController">
+    <h3>Open Calais Tags</h3>
+
+    <div ng-show="calaisTags">
+        <h4>Categories</h4>
+
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+
+            <tr ng-repeat="topic in calaisTags.topics">
+                <td>{{ topic[0] }}</td>
+                <td>{{ topic[1] }}</td>
+            </tr>
+
+            <tr>
+                <td colspan="2"></td>
+            </tr>
+
+
+        </table>
+
+        <h4>Entities</h4>
+
+        <table>
+            <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Relevance</th>
+            </tr>
+            <tbody ng-repeat="(key, value) in calaisTags.entities">
+            <tr>
+                <td colspan="2">{{ key }}</td>
+            </tr>
+            <tr ng-repeat="item in value">
+                <td>{{ item[0] }}</td>
+                <td>{{ item[1] }}</td>
+            </tr>
+
+            </tbody>
+        </table>
+
+
+
+
+    </div>
+
+
+</div>

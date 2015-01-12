@@ -30,6 +30,14 @@ class TestWebsiteLocator(TestCase):
         self.assertTrue(link_obj.success)
 
 
+    def test_find_website_links(self):
+        locator = WebsiteLocator()
+
+        link_obj = locator.get_website_meta('http://thorntons-law.co.uk')
+
+        self.assertTrue(link_obj.success)
+
+
     def test_find_page_text(self):
         locator = WebsiteLocator()
 

@@ -77,13 +77,58 @@ services.factory('CompanyWebsiteLocator', function ($http, $q){
             return delay.promise;
         };
 
-        service.getWebsiteLinks  = function(url){
+        service.getWebsiteMeta = function(url){
+
+            var delay = $q.defer();
+
+            $http.get('http://127.0.0.1:8000/getwebsitemeta/?url=' + url)
+                .success(function(data, status, headers, config) {
+                    if(data.success){
+                        delay.resolve(data.tags)
+                    } else {
+                        delay.reject('No website found at: ' + url);
+                    }
+
+                }).
+                error(function(data, status, headers, config) {
+                    delay.reject('Unable to fetch links for website: ' + url);
+                });
+
+            return delay.promise;
+
+        };
+
+        service.getWebsiteLinks = function(url){
 
             var delay = $q.defer();
 
             $http.get('http://127.0.0.1:8000/findcompanylinks/?url=' + url)
                 .success(function(data, status, headers, config) {
-                    delay.resolve(data.links)
+                    if(data.success){
+                        delay.resolve(data.links)
+                    } else {
+                        delay.reject('No website found at: ' + url);
+                    }
+                }).
+                error(function(data, status, headers, config) {
+                    delay.reject('Unable to fetch links for website: ' + url);
+                });
+
+            return delay.promise;
+
+        };
+
+        service.getCalaisTags = function (url) {
+
+            var delay = $q.defer();
+
+            $http.get('http://127.0.0.1:8000/getcalaistags?url=' + url)
+                .success(function(data, status, headers, config) {
+                    if(data.success){
+                        delay.resolve(data.links)
+                    } else {
+                        delay.reject('No website found at: ' + url);
+                    }
                 }).
                 error(function(data, status, headers, config) {
                     delay.reject('Unable to fetch links for website: ' + url);
@@ -96,3 +141,53 @@ services.factory('CompanyWebsiteLocator', function ($http, $q){
         return service;
 
     });
+
+services.factory('CompanyPageResults', function ($http, $q){
+
+    var service = {};
+
+    service.getCalaisTags = function (url) {
+
+        var delay = $q.defer();
+
+        $http.get('http://127.0.0.1:8000/getcalaistags/?url=' + url)
+            .success(function(data, status, headers, config) {
+                if(data.success){
+                    delay.resolve(data)
+                } else {
+                    delay.reject('No OpenCalais results found for page: ' + url);
+                }
+            }).
+            error(function(data, status, headers, config) {
+                delay.reject('Unable to fetch OpenCalais results for page: ' + url);
+            });
+
+        return delay.promise;
+
+    };
+
+    service.getPageText = function(url){
+
+        var delay = $q.defer();
+
+        $http.get('http://127.0.0.1:8000/getwebsitemeta/?url=' + url)
+            .success(function(data, status, headers, config) {
+                if(data.success){
+                    delay.resolve(data.tags)
+                } else {
+                    delay.reject('No website found at: ' + url);
+                }
+
+            }).
+            error(function(data, status, headers, config) {
+                delay.reject('Unable to fetch links for website: ' + url);
+            });
+
+        return delay.promise;
+
+    };
+
+
+    return service;
+
+});
