@@ -26,5 +26,5 @@ class WebsiteLocatorTest(unittest.TestCase):
 
     def find_website_text_test(self):
         locator = WebsiteLocator()
-        result = locator.find_website_text("http://www.woodburypark.co.uk", 5)
-        self.assertEqual(len(result.all_links), 3)
+        result = locator.get_page_text("http://www.woodburypark.co.uk", 5)
+        self.assertTrue(result['success'])

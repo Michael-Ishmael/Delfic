@@ -9,5 +9,6 @@ urlpatterns = patterns('',
                        url(r'^findcompanylinks/$', views.find_company_links, name='findcompanylinks'),
                        url(r'^getwebsitemeta/$', views.get_website_meta, name='getwebsitemeta'),
                        url(r'^getcalaistags/$', views.get_calais_tags, name='getcalaistags'),
+                       url(r'^getPageText/$', views.get_page_text, name='getPageText'),
 
 )

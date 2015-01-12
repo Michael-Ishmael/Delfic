@@ -73,3 +73,16 @@ def get_calais_tags(request):
         return JsonResponse(json_resp)
     except Exception as ex:
         return JsonResponse({"success": False, "message": ex.message})
+
+
+def get_page_text(request):
+    company_url = request.GET.get('url')
+    if not company_url:
+        company_url = request.POST.get('url')
+    locator = WebsiteLocator()
+    try:
+        page_text_response = locator.get_page_text(company_url)
+        json_resp = page_text_response.to_json_dict()
+        return JsonResponse(json_resp)
+    except Exception as ex:
+        return JsonResponse({"success": False, "message": ex.message})

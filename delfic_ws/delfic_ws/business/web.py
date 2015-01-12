@@ -136,6 +136,7 @@ class CompanyCalaisResult:
 
 class WebsiteLocator:
     def __init__(self):
+        self.tag_types = {}
         self.rootSite = "http://companycheck.co.uk/company/"
         self.API_KEY = "n6fmydbypqcp5u8wrbxu725v"
 
@@ -210,19 +211,48 @@ class WebsiteLocator:
         return result
 
 
-    def find_website_text(self, page_url, min_len):
+    def get_page_text(self, page_url, min_len):
         try:
             response = urllib2.urlopen(page_url)
             soup = BeautifulSoup(response, 'html.parser')
             [s.extract() for s in soup(['style', 'script', '[document]', 'head', 'title'])]
-            texts = soup.body.find_all(text=True)
+            tag_store = {}
+            self.walk_tree(tag_store, soup.body, 0)
 
-            visible_texts = filter(self.visible, texts)
-            visible_texts = filter(lambda t: len(t.split()) >= min_len, visible_texts)
+            # visible_texts = filter(self.visible, texts)
+            #visible_texts = filter(lambda t: len(t.split()) >= min_len, visible_texts)
             # visible_texts = soup.get_text()
-            return {"success": True, "result": visible_texts}
+            return {"success": True, "result": True}
+            # visible_texts}
         except Exception as ex:
             return {"success": False, "message": ex.message}
+
+
+    def walk_tree(self, tag_store, parent_node, depth):
+        tag_text = None
+        if hasattr(parent_node, 'children') and len(parent_node.children) > 0:
+            tag_store.children = []
+            for child in parent_node.children:
+                if hasattr(child, 'name'):
+                    if child.name is not None:
+                        node_name = child.name
+                        if node_name in self.tag_types['containers'] or node_name in self.tag_types['list_container']:
+                            self.walk_tree(tag_store, child, depth + 1)
+                        elif node_name in self.tag_types['semantic_containers']:
+                            tag_store.children.append({'name': node_name})
+                            self.walk_tree(tag_store.children[0], child, depth + 1)
+                        elif node_name == 'a':
+                            tag_store.name = node_name
+                            tag_store.text = child.string
+                            tag_store.link = child.get('href')
+
+
+                if hasattr(child, 'name'):
+                    print(child.name)
+                self.walk_tree(tag_store, child, depth + 1)
+        else:
+            print(parent_node)
+        return
 
 
     def visible(self, element):
@@ -252,43 +282,41 @@ class WebsiteLocator:
 
     def get_lists(self, url):
 
-        list_dict = {}
-
         # Anchor, pick up text and URL - bookmark or link?
         # a
 
         # Table store as headings and cells.  Extract keywords
-        #table, tr, thead, th, tbody, td, tfoot
+        # table, tr, thead, th, tbody, td, tfoot
 
 
         #Container, process sub elements and text
-        list_dict['containers'] = ['div', 'p', 'span', 'frame']
+        self.tag_types['containers'] = ['div', 'p', 'span', 'frame']
 
         #Heading store as such
-        list_dict['headings'] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+        self.tag_types['headings'] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 
         #Abbreviations, pickup 'title' attribute also
-        list_dict['abbr'] = ['abbr', 'acronym']
+        self.tag_types['abbr'] = ['abbr', 'acronym']
 
         #List container, could be nav, mark and format
-        list_dict['list_container'] = ['dl', 'ul', 'ol']
+        self.tag_types['list_container'] = ['dl', 'ul', 'ol']
 
         #List item, could be nav, mark and format
-        list_dict['list_item'] = ['li', 'dt', 'dd']
+        self.tag_types['list_item'] = ['li', 'dt', 'dd']
 
         #Semantic containers, process sub elements and text, store type of container
-        list_dict['containers'] = ['header', 'footer', 'nav', 'main', 'aside', 'address', 'article', 'section', 'aside',
+        self.tag_types['semantic_containers'] = ['header', 'footer', 'nav', 'main', 'aside', 'address', 'article', 'section', 'aside',
                                    'summary', 'details']
 
         # Formatting, take only text and ignore
-        list_dict['containers'] = ['b', 'u', 'i', 'em', 'center', 'cite', 'font', 'mark', 'q',
-                   'samp', 'small', 'sub', 'sup', 'time', 'var']
+        self.tag_types['containers'] = ['b', 'u', 'i', 'em', 'center', 'cite', 'font', 'mark', 'q',
+                                   'samp', 'small', 'sub', 'sup', 'time', 'var']
 
         # Pullouts store but ignore
-        list_dict['pullouts'] = ['blockquote', 'caption', 'pre']
+        self.tag_types['pullouts'] = ['blockquote', 'caption', 'pre']
 
         # Pullouts store but ignore
-        list_dict['pullouts'] = ['blockquote', 'caption', 'pre']
+        self.tag_types['pullouts'] = ['blockquote', 'caption', 'pre']
 
 
 
