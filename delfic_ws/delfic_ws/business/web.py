@@ -6,7 +6,7 @@ import urllib2
 import urlparse
 from calais.base.client import Calais
 
-from bs4 import BeautifulSoup, SoupStrainer
+from bs4 import BeautifulSoup, SoupStrainer, NavigableString
 
 
 class CompanyWebLink:
@@ -215,10 +215,11 @@ class WebsiteLocator:
             response = urllib2.urlopen(page_url)
             soup = BeautifulSoup(response, 'html.parser')
             [s.extract() for s in soup(['style', 'script', '[document]', 'head', 'title'])]
-            texts = soup.findAll(text=True)
+            texts = soup.body.find_all(text=True)
 
             visible_texts = filter(self.visible, texts)
             visible_texts = filter(lambda t: len(t.split()) >= min_len, visible_texts)
+            # visible_texts = soup.get_text()
             return {"success": True, "result": visible_texts}
         except Exception as ex:
             return {"success": False, "message": ex.message}
@@ -247,3 +248,48 @@ class WebsiteLocator:
         result = CompanyCalaisResult(calais_result)
         result.clean_result()
         return result
+
+
+    def get_lists(self, url):
+
+        list_dict = {}
+
+        # Anchor, pick up text and URL - bookmark or link?
+        # a
+
+        # Table store as headings and cells.  Extract keywords
+        #table, tr, thead, th, tbody, td, tfoot
+
+
+        #Container, process sub elements and text
+        list_dict['containers'] = ['div', 'p', 'span', 'frame']
+
+        #Heading store as such
+        list_dict['headings'] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+
+        #Abbreviations, pickup 'title' attribute also
+        list_dict['abbr'] = ['abbr', 'acronym']
+
+        #List container, could be nav, mark and format
+        list_dict['list_container'] = ['dl', 'ul', 'ol']
+
+        #List item, could be nav, mark and format
+        list_dict['list_item'] = ['li', 'dt', 'dd']
+
+        #Semantic containers, process sub elements and text, store type of container
+        list_dict['containers'] = ['header', 'footer', 'nav', 'main', 'aside', 'address', 'article', 'section', 'aside',
+                                   'summary', 'details']
+
+        # Formatting, take only text and ignore
+        list_dict['containers'] = ['b', 'u', 'i', 'em', 'center', 'cite', 'font', 'mark', 'q',
+                   'samp', 'small', 'sub', 'sup', 'time', 'var']
+
+        # Pullouts store but ignore
+        list_dict['pullouts'] = ['blockquote', 'caption', 'pre']
+
+        # Pullouts store but ignore
+        list_dict['pullouts'] = ['blockquote', 'caption', 'pre']
+
+
+
+

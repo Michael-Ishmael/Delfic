@@ -22,3 +22,9 @@ class WebsiteLocatorTest(unittest.TestCase):
         locator = WebsiteLocator()
         result = locator.get_calais_tags("http://www.woodburypark.co.uk/")
         self.assertEqual(len(result.all_links), 3)
+
+
+    def find_website_text_test(self):
+        locator = WebsiteLocator()
+        result = locator.find_website_text("http://www.woodburypark.co.uk", 5)
+        self.assertEqual(len(result.all_links), 3)
