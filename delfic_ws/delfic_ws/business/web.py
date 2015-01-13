@@ -134,6 +134,53 @@ class CompanyCalaisResult:
         }
 
 
+class PageTextResult:
+    def __init__(self):
+        self.text_elements = []
+        self.current_element = None
+        self.current_page_part = 'BODY'
+        self.page_parts = []
+        self.in_list_item = False
+
+    def add_text_element(self, text_element):
+        text_element.is_heading = self.current_page_part == 'HEADING'
+        text_element.is_link = self.current_page_part == 'LINK'
+        text_element.is_list = self.current_page_part == 'LIST'
+        self.text_elements.append(text_element)
+        self.current_element = text_element
+
+    def append_text_to_current_element(self, text, newline=False):
+        if self.current_element is None:
+            new_element = PageTextElement()
+            new_element.text = text
+            self.add_text_element(new_element)
+        else:
+            if newline:
+                self.current_element.text += '\r\n' + text
+            else:
+                self.current_element.text += ' ' + text
+
+    def set_current_page_part(self, page_part):
+        self.page_parts.append(page_part.upper())
+        self.current_page_part = self.page_parts[-1]
+
+    def revert_current_page_part(self):
+        del self.page_parts[-1]
+        self.current_page_part = self.page_parts[-1]
+
+
+class PageTextElement:
+    def __init__(self):
+        self.text = None
+        self.url = None
+        self.is_heading = False
+        self.page_part = None
+        self.abbr = None
+        self.is_link = False
+        self.is_list = False
+        self.probably_nav = False
+
+
 class WebsiteLocator:
     def __init__(self):
         self.tag_types = {}
@@ -160,7 +207,6 @@ class WebsiteLocator:
                 return {"success": False, "message": "Link area not found"}
         except Exception as ex:
             return {"success": False, "message": ex.message}
-
 
     def get_website_meta(self, company_url):
         result = CompanyMetaResult(company_url)
@@ -191,7 +237,6 @@ class WebsiteLocator:
             result.message = ex.message
         return result
 
-
     def find_website_links(self, company_url):
         result = CompanyScrapeResult("test", company_url)
         try:
@@ -210,14 +255,14 @@ class WebsiteLocator:
             result.message = ex.message
         return result
 
-
     def get_page_text(self, page_url, min_len):
         try:
             response = urllib2.urlopen(page_url)
             soup = BeautifulSoup(response, 'html.parser')
             [s.extract() for s in soup(['style', 'script', '[document]', 'head', 'title'])]
-            tag_store = {}
-            self.walk_tree(tag_store, soup.body, 0)
+            text_result = PageTextResult
+            self.set_lists()
+            self.walk_tree(text_result, soup.body, 0)
 
             # visible_texts = filter(self.visible, texts)
             #visible_texts = filter(lambda t: len(t.split()) >= min_len, visible_texts)
@@ -227,33 +272,69 @@ class WebsiteLocator:
         except Exception as ex:
             return {"success": False, "message": ex.message}
 
-
-    def walk_tree(self, tag_store, parent_node, depth):
+    def walk_tree(self, text_result, parent_node, depth):
         tag_text = None
+        new_page_part_set = False
         if hasattr(parent_node, 'children') and len(parent_node.children) > 0:
-            tag_store.children = []
+
             for child in parent_node.children:
                 if hasattr(child, 'name'):
                     if child.name is not None:
                         node_name = child.name
                         if node_name in self.tag_types['containers'] or node_name in self.tag_types['list_container']:
-                            self.walk_tree(tag_store, child, depth + 1)
+                            #Simple container, gather child elements
+                            self.walk_tree(text_result, child, depth + 1)
                         elif node_name in self.tag_types['semantic_containers']:
-                            tag_store.children.append({'name': node_name})
-                            self.walk_tree(tag_store.children[0], child, depth + 1)
+                            text_result.set_current_page_part(node_name)
+                            new_page_part_set = True
+                            self.walk_tree(text_result, child, depth + 1)
+                        elif node_name in self.tag_types['headings']:
+                            tag = PageTextElement()
+                            tag.text = child.string.strip()
+                            tag.is_heading = True
+                            tag.url = child.get('href')
+                            text_result.add_text_element(tag)
                         elif node_name == 'a':
-                            tag_store.name = node_name
-                            tag_store.text = child.string
-                            tag_store.link = child.get('href')
+
+                            tag = PageTextElement()
+                            tag.text = child.string.strip()
+                            tag.is_link = True
+                            tag.url = child.get('href')
+                            text_result.add_text_element(tag)
+
+                        if new_page_part_set:
+                            text_result.revert_current_page_part()
+                else:
+                    self.walk_tree(text_result, child, depth + 1)
 
 
-                if hasattr(child, 'name'):
-                    print(child.name)
-                self.walk_tree(tag_store, child, depth + 1)
+
         else:
-            print(parent_node)
+            if isinstance(parent_node, NavigableString):
+                tag = PageTextElement()
+                tag.text = parent_node.string.strip()
+                text_result.add_text_element(tag)
+            else:
+                raise NameError('Unexpected element')
         return
 
+    def has_significant_children(self, node):
+        significant = False
+        if hasattr(node, 'children') and len(node.children) > 0:
+            for child in node.children:
+                if hasattr(child, 'name'):
+                    if child.name is not None:
+                        node_name = child.name
+                        if node_name in self.tag_types['containers'] or node_name in self.tag_types['semantic_containers']:
+                            significant = self.has_significant_children(child)
+                            if significant:
+                                break
+                        elif node_name in self.tag_types['headings'] or node_name in self.tag_types['list_item']:
+                            significant = True
+                            break
+            return significant
+        else:
+            return False
 
     def visible(self, element):
         try:
@@ -280,14 +361,13 @@ class WebsiteLocator:
         return result
 
 
-    def get_lists(self, url):
+    def set_lists(self):
 
         # Anchor, pick up text and URL - bookmark or link?
         # a
 
         # Table store as headings and cells.  Extract keywords
         # table, tr, thead, th, tbody, td, tfoot
-
 
         #Container, process sub elements and text
         self.tag_types['containers'] = ['div', 'p', 'span', 'frame']
@@ -309,14 +389,14 @@ class WebsiteLocator:
                                    'summary', 'details']
 
         # Formatting, take only text and ignore
-        self.tag_types['containers'] = ['b', 'u', 'i', 'em', 'center', 'cite', 'font', 'mark', 'q',
+        self.tag_types['formatting'] = ['b', 'u', 'i', 'em', 'center', 'cite', 'font', 'mark', 'q',
                                    'samp', 'small', 'sub', 'sup', 'time', 'var']
 
         # Pullouts store but ignore
         self.tag_types['pullouts'] = ['blockquote', 'caption', 'pre']
 
         # Pullouts store but ignore
-        self.tag_types['pullouts'] = ['blockquote', 'caption', 'pre']
+        #self.tag_types['pullouts'] = ['blockquote', 'caption', 'pre']
 
 
 
