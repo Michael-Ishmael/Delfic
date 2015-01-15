@@ -2,7 +2,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from delfic_ws.business.data import CsvLoader
-from delfic_ws.business.web import WebsiteLocator
+from delfic_ws.business.web.web import WebsiteLocator
 
 
 class TestCsvLoader(TestCase):

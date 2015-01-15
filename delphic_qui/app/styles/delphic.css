@@ -9,17 +9,20 @@ header{
 }
 
 h1, h2, h3, h4 {
-    margin: 0;
+    /*margin: 0;*/
 }
 
 a {
-    color: #0b97c4;
     text-decoration: none;
 }
 
 a:hover {
     color:inherit;
     text-decoration: underline;
+}
+
+a:visited{
+    color:inherit;
 }
 
 
@@ -29,6 +32,48 @@ ul {
 
 ul li {
     list-style: none;
+}
+
+/*** Bootstrap overrides ***/
+
+.table-striped > tbody > tr:nth-child(odd) {
+    background-color: #999;
+}
+
+.jumbotron{
+    background-color: #718EA9;
+}
+
+.main-view .jumbotron a {
+    color: #fff;
+}
+
+/***************************/
+
+
+.form-inline .small-input {
+   width: 50px;
+    display: inline-block;
+}
+
+.vert-overflow {
+    overflow-y: scroll;
+}
+
+.delfic-view{
+
+}
+
+.delfic-view > div{
+    margin: 10px 0;
+}
+
+.main-view {
+
+}
+
+.main-view a{
+    color: #0b97c4;
 }
 
 .main-column h3{
@@ -57,7 +102,7 @@ ul li {
 }
 
 .company-listing{
-    max-height: 700px;
+    max-height: 500px;
     overflow: scroll;
 }
 

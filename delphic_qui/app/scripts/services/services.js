@@ -8,16 +8,57 @@ services.factory('Company', ['$resource',
         return $resource('http://127.0.0.1\\:8000/company/:id', {id: '@id'});
     }]);
 
-services.factory('MultiCompanyLoader', ['Company', '$q',
-    function (Company, $q) {
-        return function () {
-            var delay = $q.defer();
-            Company.query(function (companies) {
-                delay.resolve(companies);
-            }, function () {
-                delay.reject('Unable to fetch companies');
-            });
-            return delay.promise;
+services.factory('MultiCompanyLoader', ['Company', '$q', '$http',
+    function (Company, $q, $http) {
+        return {
+            list: function (top, filter) {
+                var delay = $q.defer();
+                var query = {}
+                if (top) query.top = top;
+                if (filter && filter.length && filter.length > 2) query.filter = filter;
+                Company.query(query, function (companies) {
+                    delay.resolve(companies);
+                }, function () {
+                    delay.reject('Unable to fetch companies');
+                });
+                return delay.promise;
+            },
+            clear: function(){
+                var delay = $q.defer();
+
+                $http.post('http://127.0.0.1:8000/upload/clearcompanies')
+                    .success(function (data, status, headers, config) {
+                        if (data.success) {
+                            delay.resolve(data.success)
+                        } else {
+                            delay.reject(data.message);
+                        }
+
+                    }).
+                    error(function (data, status, headers, config) {
+                        delay.reject('Clear companies failed');
+                    });
+
+                return delay.promise;
+            },
+            add: function(company){
+                var delay = $q.defer();
+
+                $http.post('http://127.0.0.1:8000/upload/addcompany', company)
+                    .success(function (data, status, headers, config) {
+                        if (data.success) {
+                            delay.resolve(data)
+                        } else {
+                            delay.reject(data.message);
+                        }
+
+                    }).
+                    error(function (data, status, headers, config) {
+                        delay.reject('Clear companies failed');
+                    });
+
+                return delay.promise;
+            }
         };
     }]);
 
@@ -35,7 +76,7 @@ services.factory('CompanyLoader', ['Company', '$route', '$q',
     }]);
 
 services.factory('CompanyRepository', ['Company', '$q',
-    function(Company, $q){
+    function (Company, $q) {
 
         var repo = {};
         repo.companies = [];
@@ -43,106 +84,111 @@ services.factory('CompanyRepository', ['Company', '$q',
 
         /*getCompanies();
 
-        function getCompanies(){
-            var delay = $q.defer();
-            Company.query(function (companies) {
-                delay.resolve(companies);
-            }, function () {
-                delay.reject('Unable to fetch companies');
-            });
-            return delay.promise;
-        }*/
+         function getCompanies(){
+         var delay = $q.defer();
+         Company.query(function (companies) {
+         delay.resolve(companies);
+         }, function () {
+         delay.reject('Unable to fetch companies');
+         });
+         return delay.promise;
+         }*/
 
         return repo;
 
     }
 ]);
 
-services.factory('CompanyWebsiteLocator', function ($http, $q){
+services.factory('CompanyWebsiteLocator', function ($http, $q) {
 
-        var service = {};
+    var service = {};
 
-        service.getWebsiteUrl = function(registeredNumber){
+    service.getWebsiteUrl = function (registeredNumber) {
 
-            var delay = $q.defer();
+        var delay = $q.defer();
 
-            $http.get('http://127.0.0.1:8000/company/' + registeredNumber + '/website')
-                .success(function(data, status, headers, config) {
+        $http.get('http://127.0.0.1:8000/company/' + registeredNumber + '/website')
+            .success(function (data, status, headers, config) {
+                if(data.success){
                     delay.resolve(data.url)
-                }).
-                error(function(data, status, headers, config) {
-                    delay.reject('Unable to fetch website for company ' + registeredNumber);
-                });
+                } else {
+                    delay.reject(data.message)
+                }
 
-            return delay.promise;
-        };
+            }).
+            error(function (data, status, headers, config) {
+                delay.reject('Unable to fetch website for company ' + registeredNumber);
+            });
 
-        service.getWebsiteMeta = function(url){
+        return delay.promise;
+    };
 
-            var delay = $q.defer();
+    service.getWebsiteMeta = function (url) {
 
-            $http.get('http://127.0.0.1:8000/getwebsitemeta/?url=' + url)
-                .success(function(data, status, headers, config) {
-                    if(data.success){
-                        delay.resolve(data.tags)
-                    } else {
-                        delay.reject('No website found at: ' + url);
-                    }
+        var delay = $q.defer();
 
-                }).
-                error(function(data, status, headers, config) {
-                    delay.reject('Unable to fetch links for website: ' + url);
-                });
+        $http.get('http://127.0.0.1:8000/getwebsitemeta/?url=' + url)
+            .success(function (data, status, headers, config) {
+                if (data.success) {
+                    delay.resolve(data.tags)
+                } else {
+                    delay.reject('No website found at: ' + url);
+                }
 
-            return delay.promise;
+            }).
+            error(function (data, status, headers, config) {
+                delay.reject('Unable to fetch links for website: ' + url);
+            });
 
-        };
+        return delay.promise;
 
-        service.getWebsiteLinks = function(url){
+    };
 
-            var delay = $q.defer();
+    service.getWebsiteLinks = function (url) {
 
-            $http.get('http://127.0.0.1:8000/findcompanylinks/?url=' + url)
-                .success(function(data, status, headers, config) {
-                    if(data.success){
-                        delay.resolve(data.links)
-                    } else {
-                        delay.reject('No website found at: ' + url);
-                    }
-                }).
-                error(function(data, status, headers, config) {
-                    delay.reject('Unable to fetch links for website: ' + url);
-                });
+        var delay = $q.defer();
 
-            return delay.promise;
+        $http.get('http://127.0.0.1:8000/findcompanylinks/?url=' + url)
+            .success(function (data, status, headers, config) {
+                if (data.success) {
+                    delay.resolve(data.links)
+                } else {
+                    delay.reject('No website found at: ' + url);
+                }
+            }).
+            error(function (data, status, headers, config) {
+                delay.reject('Unable to fetch links for website: ' + url);
+            });
 
-        };
+        return delay.promise;
 
-        service.getCalaisTags = function (url) {
+    };
 
-            var delay = $q.defer();
+    service.getCalaisTags = function (url) {
 
-            $http.get('http://127.0.0.1:8000/getcalaistags?url=' + url)
-                .success(function(data, status, headers, config) {
-                    if(data.success){
-                        delay.resolve(data.links)
-                    } else {
-                        delay.reject('No website found at: ' + url);
-                    }
-                }).
-                error(function(data, status, headers, config) {
-                    delay.reject('Unable to fetch links for website: ' + url);
-                });
+        var delay = $q.defer();
 
-            return delay.promise;
+        $http.get('http://127.0.0.1:8000/getcalaistags?url=' + url)
+            .success(function (data, status, headers, config) {
+                if (data.success) {
+                    delay.resolve(data.links)
+                } else {
+                    delay.reject('No website found at: ' + url);
+                }
+            }).
+            error(function (data, status, headers, config) {
+                delay.reject('Unable to fetch links for website: ' + url);
+            });
 
-        };
+        return delay.promise;
 
-        return service;
+    };
 
-    });
+    return service;
 
-services.factory('CompanyPageResults', function ($http, $q){
+});
+
+services.factory('CompanyPageResults', function ($http, $q) {
 
     var service = {};
 
@@ -151,14 +197,14 @@ services.factory('CompanyPageResults', function ($http, $q){
         var delay = $q.defer();
 
         $http.get('http://127.0.0.1:8000/getcalaistags/?url=' + url)
-            .success(function(data, status, headers, config) {
-                if(data.success){
+            .success(function (data, status, headers, config) {
+                if (data.success) {
                     delay.resolve(data)
                 } else {
                     delay.reject('No OpenCalais results found for page: ' + url);
                 }
             }).
-            error(function(data, status, headers, config) {
+            error(function (data, status, headers, config) {
                 delay.reject('Unable to fetch OpenCalais results for page: ' + url);
             });
 
@@ -166,20 +212,20 @@ services.factory('CompanyPageResults', function ($http, $q){
 
     };
 
-    service.getPageText = function(url){
+    service.getPageText = function (url) {
 
         var delay = $q.defer();
 
         $http.get('http://127.0.0.1:8000/getwebsitemeta/?url=' + url)
-            .success(function(data, status, headers, config) {
-                if(data.success){
+            .success(function (data, status, headers, config) {
+                if (data.success) {
                     delay.resolve(data.tags)
                 } else {
                     delay.reject('No website found at: ' + url);
                 }
 
             }).
-            error(function(data, status, headers, config) {
+            error(function (data, status, headers, config) {
                 delay.reject('Unable to fetch links for website: ' + url);
             });
 

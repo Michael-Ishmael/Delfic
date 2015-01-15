@@ -17,7 +17,6 @@ class CsvLoader:
         reader = csv.reader(csvFile, 'norm')
         reader.next()
         # companies = []
-        Company.objects.all().delete()
         for rowDef in reader:
             i = 0
             cur_comp = Company()

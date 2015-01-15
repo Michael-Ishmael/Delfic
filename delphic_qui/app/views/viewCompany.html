@@ -28,7 +28,7 @@
 
         <div class="summary-section website-url">
             <p class="message" ng-show="websiteStatus" ng-bind-html-unsafe="websiteStatus">
-
+                {{ websiteStatus }}
             </p>
             <a ng-show="company.website" href="{{company.website}}" target="_blank">
                 {{ company.website }}</a>

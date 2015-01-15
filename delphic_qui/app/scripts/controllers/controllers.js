@@ -1,19 +1,27 @@
 'use strict';
 
 var app = angular.module('delfic',
-    ['delfic.directives', 'delfic.services']);
+    ['ngRoute', 'delfic.directives', 'delfic.services',  'blueimp.fileupload']);
 
-app.config(['$routeProvider', function ($routeProvider) {
+app.config(['$routeProvider', '$httpProvider', 'fileUploadProvider', function ($routeProvider, $httpProvider, fileUploadProvider) {
     $routeProvider.
         when('/', {
+            templateUrl: '/views/companyUpload.html',
+            controller: 'CompanyUploadCtrl'
+        }).
+        when('/extraction', {
+            templateUrl: '/views/extractionViewer.html',
+            controller: 'ExtractionCtrl'
+        }).
+        when('/extraction/list', {
             controller: 'ListCtrl',
             resolve: {
                 companies: ["MultiCompanyLoader", function (MultiCompanyLoader) {
-                    return MultiCompanyLoader();
+                    return MultiCompanyLoader.list();
                 }]
             },
             templateUrl: '/views/list.html'
-        }).when('/edit/:companyId', {
+        }).when('/extraction/edit/:companyId', {
             controller: 'EditCtrl',
             resolve: {
                 company: ["CompanyLoader", function (CompanyLoader) {
@@ -21,7 +29,7 @@ app.config(['$routeProvider', function ($routeProvider) {
                 }]
             },
             templateUrl: '/views/companyForm.html'
-        }).when('/view/:companyId', {
+        }).when('/extraction/view/:companyId', {
             controller: 'ViewCtrl',
             resolve: {
                 company: ["CompanyLoader", function (CompanyLoader) {
@@ -29,11 +37,92 @@ app.config(['$routeProvider', function ($routeProvider) {
                 }]
             },
             templateUrl: '/views/viewCompany.html'
-        }).when('/new', {
+        }).when('/extraction/new', {
             controller: 'NewCtrl',
             templateUrl: '/views/companyForm.html'
         }).otherwise({redirectTo: '/'});
+
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
+    fileUploadProvider.defaults.redirect = window.location.href.replace(
+        /\/[^\/]*$/,
+        '/cors/result.html?%s'
+    );
+
 }]);
+
+app.controller('appCtrl', ['$scope', '$location', 'MultiCompanyLoader',
+    function($scope, $location, MultiCompanyLoader){
+
+        $scope.isActive = function (viewLocation){
+            return viewLocation === $location.path();
+        };
+
+        $scope.companies = [];
+
+        $scope.loadCompanies = function(top, filter){
+
+            top = top || 20;
+
+            MultiCompanyLoader.list(top, filter).then(function (companies) {
+
+                $scope.companies = companies;
+            });
+        };
+
+        $scope.clearCompanies = function(){
+
+            MultiCompanyLoader.clear().then(function(status){
+                if(status){
+                    $scope.companies = []
+                }
+            })
+        }
+
+        $scope.addNewCompany = function(company){
+            MultiCompanyLoader.add(company).then(function(status){
+                if(status){
+                    $scope.companies.unshift(company)
+                }
+            })
+        }
+
+    }
+]);
+
+
+app.controller('CompanyUploadCtrl', ['$scope',
+        function($scope){
+
+            $scope.top = 20;
+            $scope.filter = '';
+
+            $scope.loadCompanies($scope.top, null);
+
+            $scope.$watch('top', updateList);
+            $scope.$watch('filter', updateList);
+
+            function updateList(){
+                $scope.loadCompanies($scope.top, $scope.filter);
+            }
+
+            $scope.companyToAdd = {}
+
+            $scope.addCompany = function(){
+                if($scope.companyToAdd.name && $scope.companyToAdd.registerednumber)
+                    $scope.addNewCompany($scope.companyToAdd);
+            }
+
+
+        }]
+    );
+
+app.controller('ExtractionCtrl', ['$scope',
+    function($scope){
+
+
+
+    }
+]);
 
 app.controller('ListCtrl', ['$scope', 'companies', 'CompanyWebsiteLocator',
     function ($scope, companies, CompanyWebsiteLocator) {
@@ -102,7 +191,7 @@ app.controller('CompanyListController', function ($scope, CompanyRepository, Mul
             $scope.companies = $scope.repo.companies;
         });
 
-        MultiCompanyLoader().then(function (companies) {
+        MultiCompanyLoader.list().then(function (companies) {
             $scope.repo.companies = companies;
         });
 
@@ -220,3 +309,63 @@ app.controller('CompanyMetadataController', function ($scope, CompanyRepository,
 
 
 });
+
+
+app.controller('DemoFileUploadController', [
+    '$scope', '$http', '$filter', '$window',
+    function ($scope, $http) {
+        var url = 'http://127.0.0.1:8000/upload/uploadcompanyfilex';
+        $scope.options = {
+            url: url
+        };
+
+        //$scope.getList = function(){
+            $http.get(url)
+                .then(
+                function (response) {
+                    $scope.loadingFiles = false;
+                    $scope.queue = response.data.files || [];
+                },
+                function () {
+                    $scope.loadingFiles = false;
+                }
+            );
+        //};
+
+        $scope.loadingFiles = false;
+
+
+    }
+]);
+
+app.controller('FileDestroyController', [
+    '$scope', '$http',
+    function ($scope, $http) {
+        var file = $scope.file,
+            state;
+        if (file.url) {
+            file.$state = function () {
+                return state;
+            };
+            file.$destroy = function () {
+                state = 'pending';
+                return $http({
+                    url: file.deleteUrl,
+                    method: file.deleteType
+                }).then(
+                    function () {
+                        state = 'resolved';
+                        $scope.clear(file);
+                    },
+                    function () {
+                        state = 'rejected';
+                    }
+                );
+            };
+        } else if (!file.$cancel && !file._index) {
+            file.$cancel = function () {
+                $scope.clear(file);
+            };
+        }
+    }
+]);

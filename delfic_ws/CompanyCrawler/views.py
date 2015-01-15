@@ -1,16 +1,23 @@
 from django.http import JsonResponse
-from django.shortcuts import render
-from CompanyCrawler.models import Company
 
+from CompanyCrawler.models import Company
 from delfic_ws.business.data import CsvLoader
-from delfic_ws.business.web import WebsiteLocator
+from delfic_ws.business.web.web import WebsiteLocator
+
 
 
 # def index(request):
 # return JsonResponse({"success": True, "message": "Site running..."})
 
 def index(request):
-    company_list = Company.objects.order_by('-Name')[:20]
+    company_cnt = request.GET.get('top')
+    if not company_cnt:
+        company_cnt = 20
+    filter = request.GET.get('filter')
+    if filter:
+        company_list = Company.objects.filter(Name__contains=filter).order_by('Name')[:company_cnt]
+    else:
+        company_list = Company.objects.order_by('Name')[:company_cnt]
     j_comps = map(lambda c: c.to_json_obj(), company_list)
     return JsonResponse(j_comps, safe=False)
 
