@@ -2,43 +2,60 @@
 <html lang="en" ng-app="delfic">
 <head>
     <title>Delphic - Company Crawler</title>
-    <script src="scripts/vendor/angular.min.js"></script>
+
+    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>-->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular-route.js"></script>
+    <!--<script src="scripts/vendor/angular.min.js"></script>-->
     <script src="scripts/vendor/angular-resource.min.js"></script>
+
+    <script src="scripts/vendor/jquery.ui.widget.js"></script>
+    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+    <script src="scripts/vendor/jquery.iframe-transport.js"></script>
+    <!-- The basic File Upload plugin -->
+    <script src="scripts/vendor/jquery.fileupload.js"></script>
+    <!-- The File Upload processing plugin -->
+    <script src="scripts/vendor/jquery.fileupload-process.js"></script>
+    <!-- The File Upload validation plugin -->
+    <script src="scripts/vendor/jquery.fileupload-validate.js"></script>
+    <!-- The File Upload Angular JS module -->
+    <script src="scripts/vendor/jquery.fileupload-angular.js"></script>
+
     <script src="scripts/directives/directives.js"></script>
     <script src="scripts/services/services.js"></script>
     <script src="scripts/controllers/controllers.js"></script>
     <link href="styles/bootstrap.css" rel="stylesheet">
     <link href="styles/delphic.css" rel="stylesheet">
+    <link href="styles/jquery.fileupload.css" rel="stylesheet">
+    <link href="styles/jquery.fileupload-ui.css" rel="stylesheet">
 </head>
-<body>
-<header>
-    <div class="container-fluid">
-        <h2>Company Crawler</h2>
+<body ng-controller="appCtrl">
+<header >
+    <div class="container-fluid" >
+
+        <div class="row">
+            <div class="col-md-4">
+                <h1>Company Crawler</h1>
+            </div>
+            <div class="col-md-8">
+                <nav class="pull-right">
+                    <ul class="nav nav-pills">
+                        <li ng-class="{ active: isActive('/')}"><a href="/#" >Company Upload</a></li>
+                        <li ng-class="{ active: isActive('/extraction')}"><a href="/#/extraction"  >Extraction Viewer</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
     </div>
 
 </header>
 
 <div butterbar>Loading...</div>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="main-column col-md-3 color-1 nopadding">
-            <div ng-controller="CompanyListController" ng-include="'views/list.html'">
-            </div>
-        </div>
-        <div class="col-md-4 color-2">
-            <div ng-controller="ManageCompanyController" ng-include="'views/viewCompany.html'">
+<div ng-view class="main-view"></div>
 
-            </div>
-        </div>
-        <div class="col-md-5 color-3">
-            <div ng-include="'views/companyMetadata.html'">
 
-            </div>
-        </div>
-
-    </div>
-
-</div>
 </body>
 </html>
