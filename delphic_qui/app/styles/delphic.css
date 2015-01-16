@@ -37,7 +37,7 @@ ul li {
 /*** Bootstrap overrides ***/
 
 .table-striped > tbody > tr:nth-child(odd) {
-    background-color: #999;
+    /*background-color: #999;*/
 }
 
 .jumbotron{
@@ -48,8 +48,22 @@ ul li {
     color: #fff;
 }
 
+#fileupload .progress{
+    margin-bottom: 0;
+}
+
+
+
 /***************************/
 
+.main-column .text-filter{
+    max-width: 135px;
+}
+
+.dark-grey {
+    background-color:  #444;
+    min-height: 700px;
+}
 
 .form-inline .small-input {
    width: 50px;
@@ -102,8 +116,12 @@ ul li {
 }
 
 .company-listing{
-    max-height: 500px;
+    max-height: 300px;
     overflow: scroll;
+}
+
+.main-column .company-listing {
+    max-height: 500px;
 }
 
 .company-listing li:nth-child(odd) {
@@ -167,4 +185,9 @@ ul li {
 
 .website-links div{
     margin-bottom: 20px;
+}
+
+.page-summary {
+    background-color: #666;
+    min-height: 300px;
 }

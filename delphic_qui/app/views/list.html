@@ -1,34 +1,59 @@
 <h3>Company List</h3>
-<ul class="company-listing">
-    <li ng-repeat="company in companies"  ng-click="selectCompany($index, company.registerednumber)">
-        <div class="row">
-            <div class="col-md-10">
-                <div class="company-name"><a>{{company.name}}</a></div>
+
+<div class="delfic-view">
+
+    <div>
+        <form class="form-inline">
+            <div class="form-group">
+                <label class="sr-only" for="companyCount2">Companies to list</label>
+                Show
+                <input type="text" class="form-control small-input" id="companyCount2" ng-model="listQuery.top">
+                Companies
             </div>
-            <div class="col-md-2 text-right">
-                <span ng-click="$scope.edit()" class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            <div class="form-group">
+                <label class="sr-only" for="companyFilter2">Search Name</label>
+                <input type="text" class="form-control text-filter" id="companyFilter2" placeholder="Filter Name"
+                       ng-model="listQuery.filter">
             </div>
-        </div>
+        </form>
 
-        <div class="reg-number">{{company.registerednumber}}</div>
-        <div class="address">
-            <span ng-show="company.address == null">No Address</span>
-            <address>
-                <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
-                <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
-                <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
-                <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
-                <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
-                <span ng-show="company.address.town">{{company.address.town}}<br></span>
-                <span ng-show="company.address.county">{{company.address.county}}<br></span>
-                <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
-            </address>
-        </div>
+    </div>
 
-        <div ng-show="company.website">
-            <a href="{{company.website}}" target="_blank">
-                {{ company.website }}</a>
-        </div>
+    <div>
+        <ul class="company-listing">
+            <li ng-repeat="company in companies"  ng-click="selectCompany($index, company.registerednumber)">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="company-name"><a>{{company.name}}</a></div>
+                    </div>
+                    <div class="col-md-2 text-right">
+                        <span ng-click="$scope.edit()" class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                    </div>
+                </div>
 
-    </li>
-</ul>
+                <div class="reg-number">{{company.registerednumber}}</div>
+                <div class="address">
+                    <span ng-show="company.address == null">No Address</span>
+                    <address>
+                        <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
+                        <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
+                        <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
+                        <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
+                        <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
+                        <span ng-show="company.address.town">{{company.address.town}}<br></span>
+                        <span ng-show="company.address.county">{{company.address.county}}<br></span>
+                        <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
+                    </address>
+                </div>
+
+                <div ng-show="company.website">
+                    <a href="{{company.website}}" target="_blank">
+                        {{ company.website }}</a>
+                </div>
+
+            </li>
+        </ul>
+    </div>
+
+</div>
+

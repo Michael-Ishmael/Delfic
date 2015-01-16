@@ -1,87 +1,119 @@
-<div class="control-buttons">
-    <button class="btn btn-primary" ng-class="{disabled: !company}" ng-click="getWebsiteUrl(company.registerednumber)">
-        Find Website
-    </button>
-    <button class="btn btn-primary" ng-class="{disabled: !company.website}" ng-click="loadSiteData()">Find Pages
-    </button>
-</div>
-
 <div class="company-summary-container">
     <div class="company-summary" ng-show="company">
-        <h3>{{company.name}}</h3>
+        <div class="delfic-view">
 
-        <div>{{company.registerednumber}}</div>
-        <br>
-        <h4>Address</h4>
-        <span ng-show="company.address == null">No Address</span>
-        <address>
-            <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
-            <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
-            <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
-            <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
-            <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
-            <span ng-show="company.address.town">{{company.address.town}}<br></span>
-            <span ng-show="company.address.county">{{company.address.county}}<br></span>
-            <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
-        </address>
+            <h3>{{company.name}}</h3>
 
+            <div>{{company.registerednumber}}</div>
 
-        <div class="summary-section website-url">
-            <p class="message" ng-show="websiteStatus" ng-bind-html-unsafe="websiteStatus">
-                {{ websiteStatus }}
-            </p>
-            <a ng-show="company.website" href="{{company.website}}" target="_blank">
-                {{ company.website }}</a>
-        </div>
+            <h4>Address</h4>
+            <span ng-show="company.address == null">No Address</span>
+            <address>
+                <span ng-show="company.address.addr1">{{company.address.addr1}}<br></span>
+                <span ng-show="company.address.addr2">{{company.address.addr2}}<br></span>
+                <span ng-show="company.address.addr3">{{company.address.addr3}}<br></span>
+                <span ng-show="company.address.addr4">{{company.address.addr4}}<br></span>
+                <span ng-show="company.address.addr5">{{company.address.addr5}}<br></span>
+                <span ng-show="company.address.town">{{company.address.town}}<br></span>
+                <span ng-show="company.address.county">{{company.address.county}}<br></span>
+                <span ng-show="company.address.postcode">{{company.address.postcode}}<br></span>
+            </address>
 
-        <div class="summary-section website-meta-tags" ng-show="company.metatags">
-            <table>
-                <tr>
-                    <td class="label">
-                        Title
-                    </td>
-                    <td>
-                        <span ng-show="company.metatags.title">{{company.metatags.title}}</span>
-                        <span class="message" ng-hide="company.metatags.title">Website title not found.</span>
-                    </td>
-                </tr>
+            <div class="summary-section website-url">
+                <button class="btn btn-primary" ng-hide="company.website" ng-class="{disabled: !company}"
+                        ng-click="getWebsiteUrl(company.registerednumber)">
+                    Find Website
+                </button>
+                <span class="message" ng-show="websiteStatus" ng-bind-html-unsafe="websiteStatus">
+                    &nbsp;&nbsp; {{ websiteStatus }}
+                </span>
 
-                <tr>
-                    <td class="label">
-                        Description
-                    </td>
-                    <td>
-                        <span ng-show="company.metatags.description">{{company.metatags.description}}</span>
-                        <span class="message" ng-hide="company.metatags.description">Description tag not found.</span>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="label">
-                        Keywords
-                    </td>
-                    <td>
-                        <span ng-show="company.metatags.keywords">{{company.metatags.keywords}}</span>
-                        <span class="message" ng-hide="company.metatags.keywords">Keywords tag not found.</span>
-                    </td>
-                </tr>
-
-            </table>
-
-        </div>
-
-        <div class="summary-section website-links" ng-show="company.websitelinks">
-            <div ng-repeat="link in company.websitelinks">
-                <a href="{{link.link}}" target="_blank">
-                    {{ link.title}} <br>{{ (link.link) }}
-                </a>
-                <span class="glyphicon glyphicon-chevron-right" ng-click="setAnalyseUrl(link.link)"></span>
             </div>
+
         </div>
+
+        <div class="page-summary delfic-view" ng-show="company.website">
+
+
+            <div class="control-buttons clearfix">
+                <span class="btn btn-primary" ng-class="{disabled: !selections.linkHistory.length}" ng-click="loadSiteData()">
+                <i class="glyphicon glyphicon-arrow-left"></i>
+                <span>Back</span>
+                </span>
+
+                <h4 class="pull-right">
+                    <a ng-show="company.website" href="{{company.website}}" target="_blank">
+                        {{ company.website }}</a>
+                </h4>
+
+
+            </div>
+
+            <div class="text-center" ng-hide="company.metatags">
+                                <span class="btn btn-primary"  ng-class="{disabled: !selections.selectedUrl}" ng-click="loadSiteData()">
+                <i class="glyphicon glyphicon-import"></i>
+                <span>Get Page Links</span>
+                </span>
+                <p class="message" ng-show="pageLoadStatus" ng-bind-html-unsafe="pageLoadStatus">
+                    {{ pageLoadStatus }}
+                </p>
+            </div>
+
+
+            <div class="summary-section website-meta-tags" ng-show="company.metatags">
+                <table class="table">
+                    <tr>
+                        <td >
+                            Title
+                        </td>
+                        <td>
+                            <span ng-show="company.metatags.title">{{company.metatags.title}}</span>
+                            <span class="message" ng-hide="company.metatags.title">Website title not found.</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td >
+                            Description
+                        </td>
+                        <td>
+                            <span ng-show="company.metatags.description">{{company.metatags.description}}</span>
+                            <span class="message"
+                                  ng-hide="company.metatags.description">Description tag not found.</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td >
+                            Keywords
+                        </td>
+                        <td>
+                            <span ng-show="company.metatags.keywords">{{company.metatags.keywords}}</span>
+                            <span class="message" ng-hide="company.metatags.keywords">Keywords tag not found.</span>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+            <div class="summary-section website-links" ng-show="company.websitelinks">
+                <div ng-repeat="link in company.websitelinks">
+                    <a href="{{link.link}}" target="_blank">
+                        {{ link.title}} <br>{{ (link.link) }}
+                    </a>
+                    <span class="glyphicon glyphicon-chevron-right" ng-click="setAnalyseUrl(link.link)"></span>
+                </div>
+            </div>
+
+        </div>
+
 
     </div>
 
     <div class="summary-section message" ng-hide="company">
+        <h3>Company Detail View</h3>
+
         <p><span class="glyphicon glyphicon-chevron-left">&nbsp;</span>
             Select a company from the left to begin testing</p>
     </div>
