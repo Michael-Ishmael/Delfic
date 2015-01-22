@@ -1,9 +1,15 @@
+@-webkit-viewport   { width: device-width; }
+@-moz-viewport      { width: device-width; }
+@-ms-viewport       { width: device-width; }
+@-o-viewport        { width: device-width; }
+@viewport           { width: device-width; }
+
 body {
     background-color: #333333;
     color: #fff;
 }
 
-header{
+nav {
     padding: 10px 0;
     background-color: #204d74
 }
@@ -52,7 +58,26 @@ ul li {
     margin-bottom: 0;
 }
 
+.form-inline .form-group{
+    margin-bottom: 10px;
+}
 
+.navbar-default {
+    background-color: #204d74;
+    border: none;
+}
+
+.navbar-default .navbar-brand {
+    color: #fff;
+}
+
+.navbar .navbar-brand:hover{
+    color: #fff;
+}
+
+.navbar .navbar-brand:visited{
+    color: #fff;
+}
 
 /***************************/
 
@@ -100,7 +125,11 @@ ul li {
 
 .nopadding{
     padding: 0 !important;
-    margin: 0 !important;
+    /*margin: 0 !important;*/
+}
+
+.side-padded {
+    padding: 0 10px;
 }
 
 .color-1{
@@ -118,6 +147,10 @@ ul li {
 .company-listing{
     max-height: 300px;
     overflow: scroll;
+}
+
+.title-button {
+    padding: 28px 10px 20px;
 }
 
 .main-column .company-listing {

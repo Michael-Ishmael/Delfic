@@ -1,18 +1,97 @@
-<h3>Company List</h3>
+
+<div class="row">
+
+    <h3 class="col-xs-8">Company List</h3>
+
+    <div class="title-button col-xs-4 clearfix">
+        <button type="button" title="Add new company" class="btn btn-primary pull-right" ng-click="toggleAddCompanyVisible()">
+            <i class="glyphicon glyphicon-plus"></i>
+
+        </button>
+    </div>
+
+</div>
+
+<div ng-show="showAddCompany">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label for="inputCompanyName" class="col-sm-4 control-label">Name</label>
+
+            <div class="col-sm-8">
+                <input type="text" ng-model="companyToAdd.name" class="form-control"
+                       id="inputCompanyName" placeholder="Company Name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputRegNumber" class="col-sm-4 control-label">Reg Number</label>
+
+            <div class="col-sm-8">
+                <input type="text" ng-model="companyToAdd.registerednumber" class="form-control"
+                       id="inputRegNumber"
+                       placeholder="RegisteredNumber">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputAddress1" class="col-sm-4 control-label">Address 1</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="inputAddress1"
+                       placeholder="Address 1">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputAddress2" class="col-sm-4 control-label">Address 2</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="inputAddress2"
+                       placeholder="Address 2">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputTown" class="col-sm-4 control-label">Town</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="inputTown"
+                       placeholder="Town">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputPostCode" class="col-sm-4 control-label">Post Code</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="inputPostCode"
+                       placeholder="Post Code">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-4 col-sm-8">
+                                    <span class="btn btn-primary" ng-class="{disabled: disabled}" ng-click="addCompany()">
+                                        <i class="glyphicon glyphicon-plus"></i>
+                                        <span>Add Company</span>
+
+                                    </span>
+
+            </div>
+        </div>
+    </form>
+</div>
 
 <div class="delfic-view">
 
-    <div>
-        <form class="form-inline">
-            <div class="form-group">
+    <div class="side-padded">
+
+        <form class="form-inline clearfix">
+            <div class="form-group form-group-sm">
                 <label class="sr-only" for="companyCount2">Companies to list</label>
                 Show
-                <input type="text" class="form-control small-input" id="companyCount2" ng-model="listQuery.top">
+                <input type="text" class="form-control input-sm small-input" id="companyCount2" ng-model="listQuery.top">
                 Companies
             </div>
-            <div class="form-group">
-                <label class="sr-only" for="companyFilter2">Search Name</label>
-                <input type="text" class="form-control text-filter" id="companyFilter2" placeholder="Filter Name"
+            <div class="form-group form-group-sm pull-right">
+                <label class="sr-only" for="companyFilter">Search Name</label>
+                <input type="text" class="form-control input-sm" id="companyFilter" placeholder="Filter Name"
                        ng-model="listQuery.filter">
             </div>
         </form>

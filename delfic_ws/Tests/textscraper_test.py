@@ -1,5 +1,6 @@
 import unittest
 from delfic_ws.business.web.textscraper import TextScraper
+from pygoogle import pygoogle
 
 __author__ = 'scorpio'
 
@@ -13,13 +14,15 @@ class WebsiteLocatorTest(unittest.TestCase):
             print(result.message)
         self.assertEqual(result.success, True)
 
-    def get_page_text_url_test(self):
+    def get_page_text_test(self):
         scraper = TextScraper()
-        result = scraper.get_page_text(page_url='http://gorkana.com')
+        result = scraper.get_page_text(page_url='http://mclarensaviation.com/')
         if not result['success']:
             print(result['message'])
         self.assertEqual(result['success'], True)
 
+    def pygoogle_test(self):
+        g = pygoogle()
 
 html_doc = """
 <html><head><title>The Dormouse's story</title></head>

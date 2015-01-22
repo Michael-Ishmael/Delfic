@@ -8,6 +8,11 @@ __author__ = 'scorpio'
 
 class WebsiteLocatorTest(unittest.TestCase):
 
+    def find_website_test(self):
+        locator = WebsiteLocator()
+        result = locator.find_website('06920905')
+        self.assertEqual(result, 'dd')
+
     def get_website_meta_test(self):
         locator = WebsiteLocator()
         result = locator.get_website_meta("http://www.woodburypark.co.uk/")
@@ -30,6 +35,8 @@ class WebsiteLocatorTest(unittest.TestCase):
         locator = WebsiteLocator()
         result = locator.get_page_text("http://www.woodburypark.co.uk", 5)
         self.assertTrue(result['success'])
+
+
 
 
 html_doc = """

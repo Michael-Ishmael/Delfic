@@ -89,7 +89,7 @@ def get_page_text(request):
     locator = WebsiteLocator()
     try:
         page_text_response = locator.get_page_text(company_url)
-        json_resp = page_text_response.to_json_dict()
-        return JsonResponse(json_resp)
+        # json_resp = page_text_response.to_json_dict()
+        return JsonResponse(page_text_response)
     except Exception as ex:
         return JsonResponse({"success": False, "message": ex.message})

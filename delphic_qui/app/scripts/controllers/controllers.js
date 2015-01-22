@@ -1,11 +1,25 @@
 'use strict';
 
+if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
+    var msViewportStyle = document.createElement('style')
+    msViewportStyle.appendChild(
+        document.createTextNode(
+            '@-ms-viewport{width:auto!important}'
+        )
+    )
+    document.querySelector('head').appendChild(msViewportStyle)
+}
+
 var app = angular.module('delfic',
     ['ngRoute', 'delfic.directives', 'delfic.services',  'blueimp.fileupload']);
 
+app.constant('WS_PREFIX', 'http://127.0.0.1:8000');
 app.config(['$routeProvider', '$httpProvider', 'fileUploadProvider', function ($routeProvider, $httpProvider, fileUploadProvider) {
     $routeProvider.
         when('/', {
+            templateUrl: '/views/landing.html'
+        }).
+        when('/upload', {
             templateUrl: '/views/companyUpload.html',
             controller: 'CompanyUploadCtrl'
         }).
@@ -114,6 +128,22 @@ app.controller('CompanyListController',
         $scope.repo = CompanyRepository;
         $scope.companies = [];
 
+        $scope.showAddCompany = false;
+
+        $scope.toggleAddCompanyVisible = function(){
+          $scope.showAddCompany = !$scope.showAddCompany;
+        };
+
+        $scope.companyToAdd = {};
+
+        $scope.addCompany = function(){
+            if($scope.companyToAdd.name && $scope.companyToAdd.registerednumber)
+                $scope.addNewCompany($scope.companyToAdd);
+        };
+
+
+        $scope.addNewCompany()
+
         $scope.$watch('repo.companies', function(){
             $scope.companies = $scope.repo.companies;
         });
@@ -202,7 +232,7 @@ app.controller('CompanyMetadataController', function ($scope, CompanyPageResults
     $scope.loadPageResults  = function() {
         if(!$scope.pageUrl) return;
         getPageCalais();
-        //getWebsiteLinks();
+        getPageText();
     };
 
     function getPageCalais () {
@@ -216,6 +246,20 @@ app.controller('CompanyMetadataController', function ($scope, CompanyPageResults
                 $scope.status = errorPayload;
             }
         );
+    }
+
+    function getPageText(){
+        $scope.status = 'Finding page Open Calais results...';
+        var promise = CompanyPageResults.getPageText($scope.pageUrl);
+        promise.then(function (payload) {
+                $scope.pageText = payload;
+                $scope.status = null;
+            },
+            function (errorPayload) {
+                $scope.status = errorPayload;
+            }
+        );
+
     }
 
     function getWebsiteLinks() {

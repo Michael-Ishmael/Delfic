@@ -1,3 +1,4 @@
+import string
 import urllib2
 from bs4 import BeautifulSoup, SoupStrainer, NavigableString
 
@@ -18,20 +19,56 @@ class TextScraper:
 
             soup = BeautifulSoup(html, 'html.parser')
             [s.extract() for s in soup(['style', 'script', '[document]', 'head', 'title'])]
-            # text_result = PageTextResult()
-            # text_result.start_new_text_block()
-            # self.set_lists()
-            # self.walk_tree(text_result, soup.body, 0)
+            text_parts = {}
+            test_add = set()
+            headers = soup.find_all(['h1', 'h2', 'h3'])
+            self.add_to_string_collection(headers, 'headers', text_parts, test_add)
+            links = soup.find_all('a')
+            self.add_to_string_collection(links, 'links', text_parts, test_add)
             visible_text = soup.stripped_strings
-            for txt in soup.stripped_strings:
-                print(txt)
-            # visible_texts = filter(self.visible, texts)
-            # visible_texts = filter(lambda t: len(t.split()) >= min_len, visible_texts)
-            # visible_texts = soup.get_text()
+            self.add_to_string_collection(visible_text, 'text', text_parts, test_add)
+            for k in text_parts:
+                for v in text_parts[k]:
+                    print(k, v)
+            # print(text_parts)
+
             return {"success": True, "result": visible_text}
             # visible_texts}
         except Exception as ex:
             return {"success": False, "message": ex.message}
+
+    def add_to_string_collection(self, tag_string_list, key, tag_dict, check_list):
+        """
+        :type tag_dict: dict
+        :type check_list: set
+        :param tag_string_list:
+        :param key:
+        :param dict:
+        :param check_list:
+        :return:
+        """
+
+        for tag_str in tag_string_list:
+            try:
+                if type(tag_str) is unicode or type(tag_str) is str:
+                    stp_str = tag_str.strip()
+                elif hasattr(tag_str, 'stripped_strings'):
+                    stp_str = " ".join(tag_str.stripped_strings)
+
+                if not stp_str:
+                    continue
+
+                stp_str = ''.join(filter(lambda x: x in string.printable, stp_str)).strip()
+                if stp_str:
+                    if stp_str.lower() not in check_list:
+                        check_list.add(stp_str.lower())
+                        tag_string_list = tag_dict.setdefault(key, [])
+                        tag_string_list.append(stp_str)
+            except Exception as ex:
+                pass
+
+
+
 
     def walk_tree(self, text_result, parent_node, depth):
         tag_text = None

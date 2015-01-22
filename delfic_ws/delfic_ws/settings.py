@@ -63,6 +63,14 @@ WSGI_APPLICATION = 'delfic_ws.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'delfic',
+        'USER': 'user_delfic',
+        'PASSWORD': 'delfic',
+        'HOST': 'localhost',
+        'PORT': '3306'
+    },
+    'test': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }

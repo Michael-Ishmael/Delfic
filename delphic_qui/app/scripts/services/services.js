@@ -3,17 +3,19 @@
 var services = angular.module('delfic.services',
     ['ngResource']);
 
-services.factory('Company', ['$resource',
-    function ($resource) {
-        return $resource('http://127.0.0.1\\:8000/company/:id', {id: '@id'});
+services.factory('Company', ['$resource', 'WS_PREFIX',
+    function ($resource, WS_PREFIX) {
+        var prefix = WS_PREFIX.replace(':8', '\\:8');
+        return $resource(prefix + '/company/:id', {id: '@id'});
     }]);
+
 
 services.factory('MultiCompanyLoader', ['Company', '$q', '$http',
     function (Company, $q, $http) {
         return {
             list: function (top, filter) {
                 var delay = $q.defer();
-                var query = {}
+                var query = {};
                 if (top) query.top = top;
                 if (filter && filter.length && filter.length > 2) query.filter = filter;
                 Company.query(query, function (companies) {
@@ -26,7 +28,7 @@ services.factory('MultiCompanyLoader', ['Company', '$q', '$http',
             clear: function(){
                 var delay = $q.defer();
 
-                $http.post('http://127.0.0.1:8000/upload/clearcompanies')
+                $http.post(WS_PREFIX + '/upload/clearcompanies')
                     .success(function (data, status, headers, config) {
                         if (data.success) {
                             delay.resolve(data.success)
@@ -44,7 +46,7 @@ services.factory('MultiCompanyLoader', ['Company', '$q', '$http',
             add: function(company){
                 var delay = $q.defer();
 
-                $http.post('http://127.0.0.1:8000/upload/addcompany', company)
+                $http.post(WS_PREFIX + '/upload/addcompany', company)
                     .success(function (data, status, headers, config) {
                         if (data.success) {
                             delay.resolve(data)
@@ -99,7 +101,7 @@ services.factory('CompanyRepository', ['Company', '$q',
     }
 ]);
 
-services.factory('CompanyWebsiteLocator', function ($http, $q) {
+services.factory('CompanyWebsiteLocator', ['$http', '$q', 'WS_PREFIX', function ($http, $q, WS_PREFIX) {
 
     var service = {};
 
@@ -107,7 +109,7 @@ services.factory('CompanyWebsiteLocator', function ($http, $q) {
 
         var delay = $q.defer();
 
-        $http.get('http://127.0.0.1:8000/company/' + registeredNumber + '/website')
+        $http.get(WS_PREFIX + '/company/' + registeredNumber + '/website')
             .success(function (data, status, headers, config) {
                 if(data.success){
                     delay.resolve(data.url)
@@ -127,7 +129,7 @@ services.factory('CompanyWebsiteLocator', function ($http, $q) {
 
         var delay = $q.defer();
 
-        $http.get('http://127.0.0.1:8000/getwebsitemeta/?url=' + url)
+        $http.get(WS_PREFIX + '/getwebsitemeta/?url=' + url)
             .success(function (data, status, headers, config) {
                 if (data.success) {
                     delay.resolve(data.tags)
@@ -148,7 +150,7 @@ services.factory('CompanyWebsiteLocator', function ($http, $q) {
 
         var delay = $q.defer();
 
-        $http.get('http://127.0.0.1:8000/findcompanylinks/?url=' + url)
+        $http.get(WS_PREFIX + '/findcompanylinks/?url=' + url)
             .success(function (data, status, headers, config) {
                 if (data.success) {
                     delay.resolve(data.links)
@@ -163,12 +165,31 @@ services.factory('CompanyWebsiteLocator', function ($http, $q) {
         return delay.promise;
 
     };
+    service.getPageText = function (url) {
+
+        var delay = $q.defer();
+
+        $http.get(WS_PREFIX + '/getpagetext?url=' + url)
+            .success(function (data, status, headers, config) {
+                if (data.success) {
+                    delay.resolve(data.result)
+                } else {
+                    delay.reject('No text found at: ' + url);
+                }
+            }).
+            error(function (data, status, headers, config) {
+                delay.reject('Unable to fetch text for page: ' + url);
+            });
+
+        return delay.promise;
+
+    };
 
     service.getCalaisTags = function (url) {
 
         var delay = $q.defer();
 
-        $http.get('http://127.0.0.1:8000/getcalaistags?url=' + url)
+        $http.get(WS_PREFIX + '/getcalaistags?url=' + url)
             .success(function (data, status, headers, config) {
                 if (data.success) {
                     delay.resolve(data.links)
@@ -186,9 +207,9 @@ services.factory('CompanyWebsiteLocator', function ($http, $q) {
 
     return service;
 
-});
+}]);
 
-services.factory('CompanyPageResults', function ($http, $q) {
+services.factory('CompanyPageResults', ['$http', '$q', 'WS_PREFIX', function ($http, $q, WS_PREFIX) {
 
     var service = {};
 
@@ -196,7 +217,7 @@ services.factory('CompanyPageResults', function ($http, $q) {
 
         var delay = $q.defer();
 
-        $http.get('http://127.0.0.1:8000/getcalaistags/?url=' + url)
+        $http.get(WS_PREFIX + '/getcalaistags/?url=' + url)
             .success(function (data, status, headers, config) {
                 if (data.success) {
                     delay.resolve(data)
@@ -216,17 +237,16 @@ services.factory('CompanyPageResults', function ($http, $q) {
 
         var delay = $q.defer();
 
-        $http.get('http://127.0.0.1:8000/getwebsitemeta/?url=' + url)
+        $http.get(WS_PREFIX + '/getpagetext?url=' + url)
             .success(function (data, status, headers, config) {
                 if (data.success) {
-                    delay.resolve(data.tags)
+                    delay.resolve(data.result)
                 } else {
-                    delay.reject('No website found at: ' + url);
+                    delay.reject('No text found at: ' + url);
                 }
-
             }).
             error(function (data, status, headers, config) {
-                delay.reject('Unable to fetch links for website: ' + url);
+                delay.reject('Unable to fetch text for page: ' + url);
             });
 
         return delay.promise;
@@ -236,4 +256,4 @@ services.factory('CompanyPageResults', function ($http, $q) {
 
     return service;
 
-});
+}]);

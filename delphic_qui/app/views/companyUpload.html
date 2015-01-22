@@ -1,4 +1,4 @@
-<div ng-controller="CompanyUploadCtrl">
+<div ng-controller="CompanyUploadCtrl" class="container-fluid">
 
 
     <div class="container-fluid">
@@ -9,16 +9,16 @@
                     <h2>Company Listing</h2>
 
                     <div>
-                        <form class="form-inline">
-                            <div class="form-group">
+                        <form class="form-inline clearfix">
+                            <div class="form-group form-group-sm">
                                 <label class="sr-only" for="companyCount">Companies to list</label>
                                 Show
-                                <input type="text" class="form-control small-input" id="companyCount" ng-model="listQuery.top">
+                                <input type="text" class="form-control input-sm small-input" id="companyCount" ng-model="listQuery.top">
                                 Companies
                             </div>
-                            <div class="form-group pull-right">
+                            <div class="form-group form-group-sm pull-right">
                                 <label class="sr-only" for="companyFilter">Search Name</label>
-                                <input type="text" class="form-control" id="companyFilter" placeholder="Filter Name"
+                                <input type="text" class="form-control input-sm" id="companyFilter" placeholder="Filter Name"
                                        ng-model="listQuery.filter">
                             </div>
                         </form>

@@ -1,4 +1,5 @@
 import json
+import string
 
 __author__ = 'funhead'
 
@@ -76,9 +77,11 @@ class CompanyScrapeResult:
         if stored_link and stored_link not in self.all_links:
             link_obj = CompanyWebLink(stored_link, title)
             self.all_links.append(link_obj)
-            link_path = urlparse.urlparse(stored_link).path
-            if link_path[-1:] == '/':
+            link_path = str(urlparse.urlparse(stored_link).path)
+            if link_path.endswith('/'):
                 link_path = link_path[:-1]
+                if str(link_path).startswith('//'):
+                    link_path = link_path[2:]
             depth = link_path.count('/')
             if depth == 1:
                 self.direct_links.append(link_obj)
@@ -200,7 +203,14 @@ class WebsiteLocator:
                     if site_link.text == 'Add Website':
                         return {"success": False, "message": "Company doesn't have a website"}
                     else:
-                        return {"success": True, "url": site_link.get('href')}
+                        company_url = site_link.get('href')
+                        try:
+                            company_resp = urllib2.urlopen(company_url)
+                            company_url = company_resp.url
+                        except Exception as ex:
+                            pass
+
+                        return {"success": True, "url": company_url}
                 else:
                     return {"success": False, "message": "Link not found"}
             else:
@@ -255,103 +265,63 @@ class WebsiteLocator:
             result.message = ex.message
         return result
 
-    def get_page_text(self, page_url, min_len):
+    def get_page_text(self, page_url=None, html=None):
         try:
-            response = urllib2.urlopen(page_url)
-            soup = BeautifulSoup(response, 'html.parser')
-            [s.extract() for s in soup(['style', 'script', '[document]', 'head', 'title'])]
-            text_result = PageTextResult
-            self.set_lists()
-            self.walk_tree(text_result, soup.body, 0)
+            if page_url is None and html is None:
+                return None
 
-            # visible_texts = filter(self.visible, texts)
-            # visible_texts = filter(lambda t: len(t.split()) >= min_len, visible_texts)
-            # visible_texts = soup.get_text()
-            return {"success": True, "result": True}
-            # visible_texts}
+            if page_url is not None:
+                html = urllib2.urlopen(page_url)
+
+            soup = BeautifulSoup(html, 'html.parser')
+            [s.extract() for s in soup(['style', 'script', '[document]', 'head', 'title'])]
+            text_parts = {}
+            test_add = set()
+            headers = soup.find_all(['h1', 'h2', 'h3'])
+            self.add_to_string_collection(headers, 'headers', text_parts, test_add)
+            links = soup.find_all('a')
+            self.add_to_string_collection(links, 'links', text_parts, test_add)
+            visible_text = soup.stripped_strings
+            self.add_to_string_collection(visible_text, 'text', text_parts, test_add)
+            # for k in text_parts:
+            #     for v in text_parts[k]:
+            #         print(k, v)
+            # print(text_parts)
+
+            return {"success": True, "result": text_parts}
+
         except Exception as ex:
             return {"success": False, "message": ex.message}
 
-    def walk_tree(self, text_result, parent_node, depth):
-        tag_text = None
-        new_page_part_set = False
-        if hasattr(parent_node, 'children') and len(parent_node.children) > 0:
+    def add_to_string_collection(self, tag_string_list, key, tag_dict, check_list):
+        """
+        :type tag_dict: dict
+        :type check_list: set
+        :param tag_string_list:
+        :param key:
+        :param dict:
+        :param check_list:
+        :return:
+        """
 
-            for child in parent_node.children:
-                if hasattr(child, 'name'):
-                    if child.name is not None:
-                        node_name = child.name
-                        if node_name in self.tag_types['containers'] or node_name in self.tag_types['list_container']:
-                            # Simple container, gather child elements
-                            self.walk_tree(text_result, child, depth + 1)
-                        elif node_name in self.tag_types['semantic_containers']:
-                            text_result.set_current_page_part(node_name)
-                            new_page_part_set = True
-                            self.walk_tree(text_result, child, depth + 1)
-                        elif node_name in self.tag_types['headings']:
-                            tag = PageTextElement()
-                            tag.text = child.string.strip()
-                            tag.is_heading = True
-                            tag.url = child.get('href')
-                            text_result.add_text_element(tag)
-                        elif node_name == 'a':
+        for tag_str in tag_string_list:
+            try:
+                if type(tag_str) is unicode or type(tag_str) is str:
+                    stp_str = tag_str.strip()
+                elif hasattr(tag_str, 'stripped_strings'):
+                    stp_str = " ".join(tag_str.stripped_strings)
 
-                            tag = PageTextElement()
-                            tag.text = child.string.strip()
-                            tag.is_link = True
-                            tag.url = child.get('href')
-                            text_result.add_text_element(tag)
+                if not stp_str:
+                    continue
 
-                        if new_page_part_set:
-                            text_result.revert_current_page_part()
-                else:
-                    self.walk_tree(text_result, child, depth + 1)
-
-
-
-        else:
-            if isinstance(parent_node, NavigableString):
-                tag = PageTextElement()
-                tag.text = parent_node.string.strip()
-                text_result.add_text_element(tag)
-            else:
-                raise NameError('Unexpected element')
-        return
-
-    def has_significant_children(self, node):
-        significant = False
-        if hasattr(node, 'children') and len(node.children) > 0:
-            for child in node.children:
-                if hasattr(child, 'name'):
-                    if child.name is not None:
-                        node_name = child.name
-                        if node_name in self.tag_types['containers'] or node_name in self.tag_types[
-                            'semantic_containers']:
-                            significant = self.has_significant_children(child)
-                            if significant:
-                                break
-                        elif node_name in self.tag_types['headings'] or node_name in self.tag_types['list_item']:
-                            significant = True
-                            break
-            return significant
-        else:
-            return False
-
-    def visible(self, element):
-        try:
-            if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
-                return False
-            elif element.strip() == '':
-                return False
-            # elif re.match('<!--.*-->', str(element)):
-            # return False
-            return True
-        except Exception as ex:
-            return False
-
-            result.success = False
-            result.message = ex.message
-        return result
+                stp_str = ''.join(filter(lambda x: x in string.printable, stp_str)).strip()
+                if stp_str:
+                    if stp_str.lower() not in check_list:
+                        check_list.add(stp_str.lower())
+                        tag_string_list = tag_dict.setdefault(key, [])
+                        tag_string_list.append(stp_str)
+            except Exception as ex:
+                pass
 
     def get_calais_tags(self, url):
         calais = Calais(self.API_KEY, submitter="python-calais demo")
@@ -359,45 +329,6 @@ class WebsiteLocator:
         result = CompanyCalaisResult(calais_result)
         result.clean_result()
         return result
-
-
-    def set_lists(self):
-
-        # Anchor, pick up text and URL - bookmark or link?
-        # a
-
-        # Table store as headings and cells.  Extract keywords
-        # table, tr, thead, th, tbody, td, tfoot
-
-        # Container, process sub elements and text
-        self.tag_types['containers'] = ['div', 'p', 'span', 'frame']
-
-        #Heading store as such
-        self.tag_types['headings'] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-
-        #Abbreviations, pickup 'title' attribute also
-        self.tag_types['abbr'] = ['abbr', 'acronym']
-
-        #List container, could be nav, mark and format
-        self.tag_types['list_container'] = ['dl', 'ul', 'ol']
-
-        #List item, could be nav, mark and format
-        self.tag_types['list_item'] = ['li', 'dt', 'dd']
-
-        #Semantic containers, process sub elements and text, store type of container
-        self.tag_types['semantic_containers'] = ['header', 'footer', 'nav', 'main', 'aside', 'address', 'article',
-                                                 'section', 'aside',
-                                                 'summary', 'details']
-
-        # Formatting, take only text and ignore
-        self.tag_types['formatting'] = ['b', 'u', 'i', 'em', 'center', 'cite', 'font', 'mark', 'q',
-                                        'samp', 'small', 'sub', 'sup', 'time', 'var']
-
-        # Pullouts store but ignore
-        self.tag_types['pullouts'] = ['blockquote', 'caption', 'pre']
-
-        # Pullouts store but ignore
-        #self.tag_types['pullouts'] = ['blockquote', 'caption', 'pre']
 
 
 
