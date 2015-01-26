@@ -5,7 +5,8 @@ __author__ = 'scorpio'
 
 
 repo = CompanyRepository()
-companies = repo.get_companies()
+companies = repo.get_companies(3323)
+
 missedCompanies = []
 foundCompanies = []
 
@@ -22,7 +23,7 @@ for i in range(0, len(companies)):
     else:
         missedCompanies.append(company)
     print(i)
-    if i > 0 and i % 3 == 0:
+    if i > 0 and i % 10 == 0:
         repo.save_company_websites(foundCompanies)
         foundCompanies = []
 
